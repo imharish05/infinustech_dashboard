@@ -104,7 +104,7 @@ const MasterLayout = ({ children }) => {
         >
           <Icon icon='radix-icons:cross-2' />
         </button>
-        <div>
+        <div className="d-flex align-items-center justify-content-center">
           <Link to='/' className='sidebar-logo'>
             <img
               src='assets/images/logo.png'
@@ -125,14 +125,16 @@ const MasterLayout = ({ children }) => {
         </div>
         <div className='sidebar-menu-area'>
           <ul className='sidebar-menu' id='sidebar-menu'>
-            <li className='dropdown'>
-              <Link to='#'>
+
+            <li>
+              <NavLink to='/'
+              className={(navData) => (navData.isActive ? "active-page" : "")}>
                 <Icon
                   icon='solar:home-smile-angle-outline'
                   className='menu-icon'
                 />
                 <span>Dashboard</span>
-              </Link>
+              </NavLink>
             </li>
 
 
@@ -171,6 +173,9 @@ const MasterLayout = ({ children }) => {
                 </li>
               </ul>
             </li>
+
+
+          {/* Project Link */}
 
             <li >
               <NavLink
@@ -225,7 +230,37 @@ const MasterLayout = ({ children }) => {
               </ul>
             </li>
 
-            <li className='sidebar-menu-group-title'>Application</li>
+                 {/* Payments */}
+             <li>
+              <NavLink
+                to='/documents'
+                className={(navData) => (navData.isActive ? "active-page" : "")}
+              >
+                <Icon icon='solar:document-add-outline' className='menu-icon' />
+                <span>Upload Documents</span>
+              </NavLink>
+            </li>
+
+            {/* Remainders and notifications */}
+             <li className="mt-3">
+              <NavLink
+                to='/notification'
+                className={(navData) => (navData.isActive ? "active-page" : "")}
+              >
+                <Icon icon='solar:bell-bing-outline' className='menu-icon' />
+                <span>Remainders & notifications</span>
+              </NavLink>
+            </li>
+
+             <li className="mt-3">
+              <NavLink
+                to='/reports'
+                className={(navData) => (navData.isActive ? "active-page" : "")}
+              >
+                <Icon icon='solar:chart-square-outline' className='menu-icon' />
+                <span>Reports</span>
+              </NavLink>
+            </li>
 
             {/* Authentication Dropdown */}
             <li className='dropdown'>
@@ -268,28 +303,6 @@ const MasterLayout = ({ children }) => {
                   </NavLink>
                 </li>
               </ul>
-            </li>
-
-
-
-            <li>
-              <NavLink
-                to='/error'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <Icon icon='streamline:straight-face' className='menu-icon' />
-                <span>404</span>
-              </NavLink>
-            </li>
-
-            <li>
-              <NavLink
-                to='/access-denied'
-                className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
-                <i className='ri-folder-lock-line menu-icon'></i>
-                <span>Access Denied</span>
-              </NavLink>
             </li>
 
 

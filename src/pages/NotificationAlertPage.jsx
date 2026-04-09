@@ -4,7 +4,6 @@ import Breadcrumb from "../components/Breadcrumb";
 import NotificationAlertLayer from "../components/NotificationAlertLayer";
 
 
-
 const NotificationAlertPage = () => {
   return (
     <>

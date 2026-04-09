@@ -15,7 +15,6 @@ const InvoiceListPage = () => {
 
         {/* Breadcrumb */}
         <Breadcrumb title="Invoice - List" />
-
         {/* InvoiceListLayer */}
         <InvoiceListLayer />
 

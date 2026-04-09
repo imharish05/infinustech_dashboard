@@ -14003,8 +14003,6 @@ td.fc-header-center {
 .sidebar-logo {
   height: 4.5rem;
   padding: 0.875rem 1rem;
-  border-inline-end: 1px solid var(--neutral-200);
-  border-block-end: 1px solid var(--neutral-200);
   display: flex;
   align-items: center;
   justify-content: flex-start;

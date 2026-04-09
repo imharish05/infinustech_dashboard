@@ -4,7 +4,6 @@ import Breadcrumb from "../components/Breadcrumb";
 import NotificationLayer from "../components/NotificationLayer";
 
 
-
 const NotificationPage = () => {
   return (
     <>
@@ -13,7 +12,7 @@ const NotificationPage = () => {
       <MasterLayout>
 
         {/* Breadcrumb */}
-        <Breadcrumb title="Settings - Notification" />
+        <Breadcrumb title="Reaminders & Notification" />
 
         {/* NotificationLayer */}
         <NotificationLayer />
