@@ -52,7 +52,13 @@ function App() {
         <Route path='/projects/:id' element={<ProtectedRoute><HasPermission permission="view-projects"><SingleProjectPage /></HasPermission></ProtectedRoute>} />
         
         {/* Customers */}
-        <Route path='/customers-list' element={<ProtectedRoute><HasPermission permission="view-customers"><UsersListPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/customers-list' element={
+          // <ProtectedRoute>
+            <HasPermission permission="view-customers"><UsersListPage />
+            </HasPermission>
+            
+        // </ProtectedRoute>
+        } />
         <Route path='/add-customer' element={<ProtectedRoute><HasPermission permission="create-customer"><AddUserPage /></HasPermission></ProtectedRoute>} />
         <Route path='/edit-customer/:id' element={<ProtectedRoute><HasPermission permission="edit-customer"><EditUserPageList /></HasPermission></ProtectedRoute>} />
 
@@ -63,7 +69,6 @@ function App() {
 
         {/* Role & Access */}
         <Route path='/role-access' element={<ProtectedRoute><HasPermission permission="manage-access"><PermissionPage /></HasPermission></ProtectedRoute>} />
-        <Route path='/assign-role' element={<ProtectedRoute><HasPermission permission="manage-roles"><AssignRolePage /></HasPermission></ProtectedRoute>} />
 
         {/* Misc */}
         <Route path='/notification' element={<ProtectedRoute><HasPermission permission="manage-remainders"><NotificationPage /></HasPermission></ProtectedRoute>} />

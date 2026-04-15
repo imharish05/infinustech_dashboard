@@ -117,7 +117,6 @@ const validate = () => {
             onChange={(e) => setPassword(e.target.value)} 
             placeholder="Minimum 6 characters" 
         />
-        
         {/* Toggle Button */}
         <button
             type="button"

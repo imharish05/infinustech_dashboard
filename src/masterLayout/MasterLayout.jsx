@@ -318,50 +318,21 @@ const isCustomerRoute =
               </NavLink>
             </li> */}
 
+ 
 
-<HasPermission permission = {["manage-access","manage-roles"]} mode = "any">
-            {/* Role & Access Dropdown */}
-            <li className='dropdown mt-3'>
-              <Link to='#'>
-                <i className='ri-user-settings-line' />
+<HasPermission permission = {"manage-access"} mode = "any">
+            <li>
+              <NavLink to='/role-access'
+              className={(navData) => (navData.isActive ? "active-page" : "")}>
+                <Icon
+                  icon='solar:home-smile-angle-outline'
+                  className='menu-icon'
+                />
                 <span>Role &amp; Access</span>
-              </Link>
-
-
-              <ul className='sidebar-submenu'>
-
-                <HasPermission permission = {"manage-access"}>
-                <li>
-                  <NavLink
-                    to='/role-access'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Role &amp; Access
-                  </NavLink>
-                </li>
-</HasPermission>
-
-<HasPermission permission = {"manage-roles"}>
-                <li>
-                  <NavLink
-                    to='/assign-role'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-warning-main w-auto' />{" "}
-                    Assign Role
-                  </NavLink>
-                </li>
-
-                </HasPermission>
-              </ul>
+              </NavLink>
             </li>
-
 </HasPermission>
+
 
             {/* Documents */}
              {/* <li>

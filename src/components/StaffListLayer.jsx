@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { allCustomerFunction } from "../features/customers/customerService";
 import Swal from "sweetalert2";
 import { deleteStaffFunction } from "../features/staff/staffService";
+import HasPermission from "./HasPermission"
 
 const StaffsListLayer = () => {
   const navigate = useNavigate();
@@ -129,10 +130,12 @@ const StaffsListLayer = () => {
           </div>
         </div>
 
+<HasPermission permission = {"create-staff"}>
         <Link to="/add-staff" className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2">
           <Icon icon="ic:baseline-plus" className="icon text-xl line-height-1" />
           Add New Staff
         </Link>
+        </HasPermission>
       </div>
 
       <div className="card-body p-24">
@@ -148,8 +151,8 @@ const StaffsListLayer = () => {
                 <th>Role</th>
                 <th>Location</th>
                 <th>Project Details</th>
-                
-                <th className="text-center">Action</th>
+              
+                {<HasPermission permission = {["edit-staff","delete-staff"]} mode = "any"><th className="text-center">Action</th></HasPermission>}
               </tr>
             </thead>
             <tbody>
@@ -216,17 +219,24 @@ const StaffsListLayer = () => {
   )}
 </div>
                       </td>
-                      
+                      <HasPermission permission = {["edit-staff","delete-staff"]} mode = "any">
                       <td className="text-center">
                         <div className="d-flex align-items-center gap-10 justify-content-center">
+                          <HasPermission permission={"edit-staff"}>
+
                           <button onClick={() => navigate(`/edit-staff/${user.id}`)} className="bg-success-focus text-success-600 w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle border-0">
                             <Icon icon="lucide:edit" />
                           </button>
+                          </HasPermission>
+                          <HasPermission permission={"delete-staff"}>
+
                           <button onClick={() => handleDelete(user.id)} className="bg-danger-focus text-danger-600 w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle border-0">
                             <Icon icon="fluent:delete-24-regular" />
                           </button>
+                          </HasPermission>
                         </div>
                       </td>
+                      </HasPermission>
                     </tr>
                   );
                 })

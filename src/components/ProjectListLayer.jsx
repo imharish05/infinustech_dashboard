@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import Swal from "sweetalert2";
 import { deleteProjectFunction } from "../features/projects/projectService";
+import HasPermission from "./HasPermission";
 
 const ProjectListLayer = () => {
   const navigate = useNavigate();
@@ -15,7 +16,9 @@ const ProjectListLayer = () => {
   const customers = useSelector((state) => state.customers.customers)
   const projectList = useSelector((state) =>  state.projects.projects)
   const staffList = useSelector((state) => state.staffs.staffs)
+  const {user} = useSelector((state) => state.auth)
 
+  const hasPermission = user?.permissions || []
 
 
   // State Management
@@ -197,16 +200,20 @@ const filteredProjects = useMemo(() => {
         </div>
 
         {/* Add Project */}
+
+        <HasPermission permission={"create-projects"}>
+
         <Link
           to="/add-projects"
           className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-        >
+          >
           <Icon
             icon="ic:baseline-plus"
             className="icon text-xl line-height-1"
-          />
+            />
           Add New Project
         </Link>
+        </HasPermission>
       </div>
 
       {/* Table */}
@@ -223,7 +230,9 @@ const filteredProjects = useMemo(() => {
                 <th>Total Cost</th>
                 <th>Status</th>
                 
+                {<HasPermission permission={["edit-projects","delete-projects"]} mode="any">
                 <th className="text-center">Action</th>
+                  </HasPermission>}
               </tr>
             </thead>
             <tbody>
@@ -236,6 +245,10 @@ const filteredProjects = useMemo(() => {
                       ).padStart(2, "0")}
                     </td>
                    <td>
+
+                  <HasPermission permission={"upload-docs"}>
+                    {console.log(HasPermission)}
+                    
     <Link 
       to={`/projects/${project.id}`} 
       className="text-primary-600 text-hover-underline"
@@ -244,6 +257,13 @@ const filteredProjects = useMemo(() => {
     >
       {project.projectName}
     </Link>
+                     </HasPermission>
+                     {
+                      !hasPermission.includes("upload-docs") && (
+                        <td>{project.projectName}</td>
+                      )
+                     }
+                     
   </td>
                     <td>{getStaffName(project.assignedStaffId)}</td>
                     <td>{getCustomerName(project.customerId)}</td>
@@ -261,39 +281,51 @@ const filteredProjects = useMemo(() => {
                       </span>
                     </td>
 
+ {<HasPermission permission={["edit-projects","delete-projects","upload-docs"]} mode="any">
                     <td className="text-center">
                       <div className="d-flex align-items-center gap-10 justify-content-center">
+                        <HasPermission permission={"upload-docs"}>
                         <button
                           type="button"
                           onClick={() => handleView(project.id)}
                           className="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                        >
+                          >
                           <Icon
                             icon="majesticons:eye-line"
                             className="icon text-xl"
-                          />
+                            />
                         </button>
+                            
+                        </HasPermission>
+
+<HasPermission permission={"edit-projects"}>
 
                         <button
                           type="button"
                           onClick={() => handleEdit(project.id)}
                           className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                        >
+                          >
                           <Icon icon="lucide:edit" className="menu-icon" />
                         </button>
+                          </HasPermission>
+
+                          <HasPermission permission={"delete-projects"}>
+
 
                         <button
                           type="button"
                           onClick={() => handleDelete(project.id)}
                           className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                        >
+                          >
                           <Icon
                             icon="fluent:delete-24-regular"
                             className="menu-icon"
-                          />
+                            />
                         </button>
+                            </HasPermission>
                       </div>
                     </td>
+                    </HasPermission>}
                   </tr>
                 ))
               ) : (

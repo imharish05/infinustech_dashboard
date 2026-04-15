@@ -28,6 +28,7 @@ const sampleData = {
   "delete-staff",
   "view-customers",
   "create-customer",
+  "edit-customer",
   "delete-customer",
   "view-projects",
   "create-projects",
@@ -35,7 +36,6 @@ const sampleData = {
   "delete-projects",
   "upload-docs",
   "manage-access",
-  "manage-roles",
   "manage-remainders",
   "view-reports"
 ]
