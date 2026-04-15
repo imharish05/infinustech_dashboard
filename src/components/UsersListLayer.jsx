@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { allCustomerFunction, deleteCustomerFunction } from "../features/customers/customerService";
 import Swal from "sweetalert2";
+import HasPermission from "./HasPermission";
 
 const UsersListLayer = () => {
   const navigate = useNavigate();
@@ -105,7 +106,7 @@ const filteredUsers = useMemo(() => {
 };
 
   // 👁️ View and ✏️ Edit Navigation
-  const handleView = (id) => navigate(`/customer/${id}`);
+  // const handleView = (id) => navigate(`/customer/${id}`);
   const handleEdit = (id) => navigate(`/edit-customer/${id}`);
 
   return (
@@ -167,16 +168,18 @@ const filteredUsers = useMemo(() => {
         </div>
 
         {/* Add User */}
+      <HasPermission permission={"create-customer"}>
         <Link
-          to="/add-user"
+          to="/add-customer"
           className="btn btn-primary text-sm btn-sm px-12 py-12 radius-8 d-flex align-items-center gap-2"
-        >
+          >
           <Icon
             icon="ic:baseline-plus"
             className="icon text-xl line-height-1"
-          />
+            />
           Add New User
         </Link>
+            </HasPermission>
       </div>
 
       {/* Table */}
@@ -192,7 +195,9 @@ const filteredUsers = useMemo(() => {
                 <th>Type</th>
                 <th>Budget</th>
                 <th>Status</th>
+                <HasPermission permission={["edit-customer","delete-customer"]} mode = "any">
                 <th className="text-center">Action</th>
+                </HasPermission>
               </tr>
             </thead>
             <tbody>
@@ -220,9 +225,12 @@ const filteredUsers = useMemo(() => {
                         {user.status}
                       </span>
                     </td>
+                       <HasPermission permission={["edit-customer","delete-customer"]} mode = "any">
                     <td className="text-center">
+
+                      
                       <div className="d-flex align-items-center gap-10 justify-content-center">
-                        <button
+                        {/* <button
                           type="button"
                           onClick={() => handleView(user.id)}
                           className="bg-info-focus bg-hover-info-200 text-info-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
@@ -231,28 +239,35 @@ const filteredUsers = useMemo(() => {
                             icon="majesticons:eye-line"
                             className="icon text-xl"
                           />
-                        </button>
+                        </button> */}
+
+                        <HasPermission permission={"edit-customer"}>
 
                         <button
                           type="button"
                           onClick={() => handleEdit(user.id)}
                           className="bg-success-focus text-success-600 bg-hover-success-200 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                        >
+                          >
                           <Icon icon="lucide:edit" className="menu-icon" />
                         </button>
+                        </HasPermission>
+
+              <HasPermission permission={"delete-customer"}>
 
                         <button
                           type="button"
                           onClick={() => handleDelete(user.id)}
                           className="remove-item-btn bg-danger-focus bg-hover-danger-200 text-danger-600 fw-medium w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle"
-                        >
+                          >
                           <Icon
                             icon="fluent:delete-24-regular"
                             className="menu-icon"
-                          />
+                            />
                         </button>
+                          </HasPermission>
                       </div>
                     </td>
+                     </HasPermission>
                   </tr>
                 ))
               ) : (

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useDispatch} from "react-redux"
 import { addCustomerFunction } from '../features/customers/customerService';
+import HasPermission from './HasPermission';
 
 const AddUserLayer = () => {
     
@@ -38,7 +39,7 @@ const AddUserLayer = () => {
 
                 const payload = {
                     // Change the id
-                    id : crypto.randomUUID(),name,address,phone,budget,projectType,status : "Active"
+                    id : crypto.randomUUID(),name,address,phone,budget,projectType,status : "Active",role : "customer"
                 }
                 setSampleId((prev) => prev +1)
                 
@@ -162,12 +163,16 @@ const AddUserLayer = () => {
                                             >
                                                 Cancel
                                             </button>
+                                            
+
+                                <HasPermission permission={"edit-customer"}>
                                             <button
                                                 type="submit"
                                                 className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"
-                                            >
+                                                >
                                                 Save
                                             </button>
+                                            </HasPermission>
                                         </div>
                                     </form>
                                 </div>

@@ -3,37 +3,15 @@ import HomePageOne from "./pages/HomePageOne";
 import EmailPage from "./pages/EmailPage";
 import AddUserPage from "./pages/AddUserPage";
 import AssignRolePage from "./pages/AssignRolePage";
-
-import CalendarMainPage from "./pages/CalendarMainPage";
 import CompanyPage from "./pages/CompanyPage";
-
 import ErrorPage from "./pages/ErrorPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-
-
-import InvoiceAddPage from "./pages/InvoiceAddPage";
-import InvoiceEditPage from "./pages/InvoiceEditPage";
-import InvoiceListPage from "./pages/InvoiceListPage";
-import InvoicePreviewPage from "./pages/InvoicePreviewPage";
-
-
-
 import NotificationPage from "./pages/NotificationPage";
-
-
-
-import RoleAccessPage from "./pages/RoleAccessPage";
 import SignInPage from "./pages/SignInPage";
-import SignUpPage from "./pages/SignUpPage";
-
-
-
 import UsersListPage from "./pages/UsersListPage";
 import ViewDetailsPage from "./pages/ViewDetailsPage";
 import ViewProfilePage from "./pages/ViewProfilePage";
 import RouteScrollToTop from "./helper/RouteScrollToTop";
-
-
 import DocumentUpload from "./pages/DocumentUpload";
 import ReportPage from "./pages/ReportPage";
 import ProjectListPage from "./pages/ProjectListPage";
@@ -44,72 +22,60 @@ import AddStaffPage from "./pages/AddStaffPage";
 import EditProjectPage from "./pages/EditProjectPage";
 import StaffListPage from "./pages/StaffListPage";
 import EditStaffListPage from "./pages/EditStaffListPage";
+import PermissionPage from "./pages/PermissionPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import HasPermission from "./components/HasPermission";
 
 function App() {
   return (
     <BrowserRouter>
       <RouteScrollToTop />
       <Routes>
-        <Route exact path='/' element={<HomePageOne />} />
-
-        {/* SL */}
-        
-        <Route exact path='/assign-role' element={<AssignRolePage />} />
-    
-        <Route exact path='/calendar-main' element={<CalendarMainPage />} />
-        <Route exact path='/calendar' element={<CalendarMainPage />} />
-   
-
-        
-        <Route exact path='/company' element={<CompanyPage />} />
-        
-    
-        <Route exact path='/email' element={<EmailPage />} />
-        <Route exact path='/forgot-password' element={<ForgotPasswordPage />} />
-    
-
-        <Route exact path='/invoice-add' element={<InvoiceAddPage />} />
-        <Route exact path='/invoice-edit' element={<InvoiceEditPage />} />
-        <Route exact path='/invoice-list' element={<InvoiceListPage />} />
-        <Route exact path='/invoice-preview' element={<InvoicePreviewPage />} />
-
-        
-        
-        <Route exact path='/notification' element={<NotificationPage />} />
-
-        
-        <Route exact path='/role-access' element={<RoleAccessPage />} />
+        {/* Public Routes */}
         <Route exact path='/sign-in' element={<SignInPage />} />
-        <Route exact path='/sign-up' element={<SignUpPage />} />
-     
-      
-      {/* Projects  */}
-        <Route exact path='/projects-list' element={<ProjectListPage />} />
-        <Route exact path='/projects/:id' element={<SingleProjectPage />} />
-        <Route exact path='/add-projects' element={<AddProjectPage />} />
-        <Route exact path='/edit-project/:id' element={<EditProjectPage />} />
-      
-
-
-
-      {/* UserList */}
-      <Route exact path='/add-customer' element={<AddUserPage />} />
-        <Route exact path='/customers-list' element={<UsersListPage />} />
-        <Route exact path='/edit-customer/:id' element={<EditUserPageList />} />
-        <Route exact path='/view-details' element={<ViewDetailsPage />} />
-        <Route exact path='/view-profile' element={<ViewProfilePage />} />
-
-{/* Staff List */}
-        <Route exact path='/add-staff' element={<AddStaffPage />} />
-        <Route exact path='/staff-list' element={<StaffListPage />} />
-        <Route exact path='/edit-staff/:id' element={<EditStaffListPage />} />
-
-
+        <Route exact path='/forgot-password' element={<ForgotPasswordPage />} />
         <Route exact path='*' element={<ErrorPage />} />
 
+        {/* Protected Dashboard */}
+        <Route exact path='/' element={
+          <ProtectedRoute>
+            <HasPermission permission="view-admin">
+              <HomePageOne />
+            </HasPermission>
+          </ProtectedRoute>
+        } />
 
-        <Route path="/documents" element = {<DocumentUpload/>}/>
-        <Route path="/reports" element = {<ReportPage/>}/>
+        {/* Projects */}
+        <Route path='/projects-list' element={<ProtectedRoute><HasPermission permission="view-projects"><ProjectListPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/add-projects' element={<ProtectedRoute><HasPermission permission="create-projects"><AddProjectPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/edit-project/:id' element={<ProtectedRoute><HasPermission permission="edit-projects"><EditProjectPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/projects/:id' element={<ProtectedRoute><HasPermission permission="view-projects"><SingleProjectPage /></HasPermission></ProtectedRoute>} />
+        
+        {/* Customers */}
+        <Route path='/customers-list' element={<ProtectedRoute><HasPermission permission="view-customers"><UsersListPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/add-customer' element={<ProtectedRoute><HasPermission permission="create-customer"><AddUserPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/edit-customer/:id' element={<ProtectedRoute><HasPermission permission="edit-customer"><EditUserPageList /></HasPermission></ProtectedRoute>} />
+
+        {/* Staff */}
+        <Route path='/staff-list' element={<ProtectedRoute><HasPermission permission="view-staffs"><StaffListPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/add-staff' element={<ProtectedRoute><HasPermission permission="create-staff"><AddStaffPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/edit-staff/:id' element={<ProtectedRoute><HasPermission permission="edit-staff"><EditStaffListPage /></HasPermission></ProtectedRoute>} />
+
+        {/* Role & Access */}
+        <Route path='/role-access' element={<ProtectedRoute><HasPermission permission="manage-access"><PermissionPage /></HasPermission></ProtectedRoute>} />
+        <Route path='/assign-role' element={<ProtectedRoute><HasPermission permission="manage-roles"><AssignRolePage /></HasPermission></ProtectedRoute>} />
+
+        {/* Misc */}
+        <Route path='/notification' element={<ProtectedRoute><HasPermission permission="manage-remainders"><NotificationPage /></HasPermission></ProtectedRoute>} />
+        
+        {/* FIXED LINE 69 BELOW */}
+        <Route path='/reports' element={<ProtectedRoute><HasPermission permission="view-reports"><ReportPage /></HasPermission></ProtectedRoute>} />
+        
+        <Route path='/documents' element={<ProtectedRoute><HasPermission permission="view-documents"><DocumentUpload /></HasPermission></ProtectedRoute>} />
+        <Route path='/view-details' element={<ProtectedRoute><ViewDetailsPage /></ProtectedRoute>} />
+        <Route path='/view-profile' element={<ProtectedRoute><ViewProfilePage /></ProtectedRoute>} />
+        <Route path='/company' element={<ProtectedRoute><CompanyPage /></ProtectedRoute>} />
+        <Route path='/email' element={<ProtectedRoute><EmailPage /></ProtectedRoute>} />
       </Routes>
     </BrowserRouter>
   );

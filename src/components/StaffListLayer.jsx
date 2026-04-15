@@ -143,9 +143,12 @@ const StaffsListLayer = () => {
                 <th>S.No</th>
                 <th>Name</th>
                 <th>Phone</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Role</th>
                 <th>Location</th>
                 <th>Project Details</th>
-                <th>Status</th>
+                
                 <th className="text-center">Action</th>
               </tr>
             </thead>
@@ -160,7 +163,10 @@ const StaffsListLayer = () => {
                       <td>{String((currentPage - 1) * itemsPerPage + index + 1).padStart(2, "0")}</td>
                       <td>{user.name}</td>
                       <td>{user.phone}</td>
-                      <td>{user.location}</td>
+                      <td>{user.email}</td>
+                      <td>{user.password}</td>
+                      <td className="text-capitalize">{user.role}</td>
+                      <td>{user.location || user.address}</td>
                       <td>
 <div className="d-flex flex-wrap gap-2">
   {userProjects.length > 0 ? (
@@ -210,11 +216,7 @@ const StaffsListLayer = () => {
   )}
 </div>
                       </td>
-                      <td>
-                        <span className={`${getStatusClass(user.status)} px-12 py-4 radius-4 fw-medium text-sm`}>
-                          {user.status}
-                        </span>
-                      </td>
+                      
                       <td className="text-center">
                         <div className="d-flex align-items-center gap-10 justify-content-center">
                           <button onClick={() => navigate(`/edit-staff/${user.id}`)} className="bg-success-focus text-success-600 w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle border-0">

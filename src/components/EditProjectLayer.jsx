@@ -3,12 +3,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from "react-redux";
 import { updateProjectFunction } from '../features/projects/projectService';
-import { assignProjectFunction, unassignProjectFunction } from '../features/staff/staffService';
+import { toggleAssignmentFunction } from '../features/staff/staffService';
 
 const EditProjectLayer = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+
+
 
     // Project State
     const [projectName, setProjectName] = useState("");
@@ -68,34 +70,51 @@ const EditProjectLayer = () => {
 
 const handleProjectUpdate = async (e) => {
     e.preventDefault();
-    try {
-        const payload = {
-            id,
-            projectName,
-            location,
-            customerName,
-            customerId,
-            assignedStaffId: selectedStaffId || null, // Ensure it's null if empty
-            assignedStaffName: selectedStaffName || null,
-            cost,
-            projectType,
-            status
-        };
 
-        const success = await updateProjectFunction(dispatch, id, payload);
+    // 1. Prepare the payload for the Project Slice
+    const payload = {
+        id,
+        projectName,
+        location,
+        customerName,
+        customerId,
+        assignedStaffId: selectedStaffId || null,
+        assignedStaffName: selectedStaffName || null,
+        cost,
+        projectType,
+        status
+    };
 
-        if (success) {
-            // 2. Handle Assignment / Unassignment logic
-            if (selectedStaffId) {
-                await assignProjectFunction(dispatch, selectedStaffId, id, true);
-            } else if (project.assignedStaffId) {
-                await unassignProjectFunction(dispatch, project.assignedStaffId, id);
-            }
+    // 2. Identify the Previous and Current State
+    // project.assignedStaffId comes from the original Redux state
+    const previousStaffId = project?.assignedStaffId;
     
-            navigate(-1);
+    // Check if the staff actually changed
+    const isStaffChanged = String(previousStaffId) !== String(selectedStaffId);
+
+    // 3. Update the Project First
+    const success = await updateProjectFunction(dispatch, id, payload);
+
+    if (success && isStaffChanged) {
+        // CASE A: Project was assigned to someone else before -> Remove it from their list
+        if (previousStaffId) {
+            await toggleAssignmentFunction(dispatch, previousStaffId, id, null, false);
         }
-    } catch (err) {
-        console.error("Update failed:", err.message);
+
+        // CASE B: A new staff member is selected -> Add it to their list
+        if (selectedStaffId) {
+            await toggleAssignmentFunction(
+                dispatch, 
+                selectedStaffId, // Ensure this is just the ID string/number
+                id, 
+                selectedStaffName, 
+                true
+            );
+        }
+    }
+    
+    if (success) {
+        navigate(-1);
     }
 };
 

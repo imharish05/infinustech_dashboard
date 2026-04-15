@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import ThemeToggleButton from "../helper/ThemeToggleButton";
+import HasPermission from "../components/HasPermission";
 
 const MasterLayout = ({ children }) => {
   let [sidebarActive, seSidebarActive] = useState(false);
@@ -140,6 +141,7 @@ const isCustomerRoute =
         <div className='sidebar-menu-area'>
           <ul className='sidebar-menu' id='sidebar-menu'>
 
+<HasPermission permission = {["view-dashboard","view-admin"]} mode = "any">
             <li>
               <NavLink to='/'
               className={(navData) => (navData.isActive ? "active-page" : "")}>
@@ -150,10 +152,13 @@ const isCustomerRoute =
                 <span>Dashboard</span>
               </NavLink>
             </li>
+</HasPermission>
 
 {/* Customers */}
 
-       <li className={`dropdown mt-3 ${isCustomerRoute ? "open" : ""}`}>
+<HasPermission permission={["view-customers","create-customer"]} mode = "any">
+
+<li className={`dropdown mt-3 ${isCustomerRoute ? "open" : ""}`}>
   <NavLink to="/customers-list" className="d-flex align-items-center gap-2">
     <Icon
       icon="flowbite:users-group-outline"
@@ -170,33 +175,48 @@ const isCustomerRoute =
       transition: "max-height 0.3s ease",
     }}
   >
+
+{/* Has permission for the customer add */}
+    <HasPermission permission={"create-customer"}>
+
+       <li>
+      <NavLink
+        to="/add-customer"
+        className={({ isActive }) =>
+          isActive ? "active-page" : ""
+      }
+      >
+        <i className="ri-circle-fill circle-icon text-info-main w-auto" />
+        Add Customer
+      </NavLink>
+    </li>
+      </HasPermission>
+
+
+<HasPermission permission={"view-customers"}>
     <li>
       <NavLink
         to="/customers-list"
         className={({ isActive }) =>
           isActive ? "active-page" : ""
-        }
+      }
       >
         <i className="ri-circle-fill circle-icon text-primary-600 w-auto" />
         Customer List
       </NavLink>
     </li>
 
-    <li>
-      <NavLink
-        to="/add-customer"
-        className={({ isActive }) =>
-          isActive ? "active-page" : ""
-        }
-      >
-        <i className="ri-circle-fill circle-icon text-info-main w-auto" />
-        Add Customer
-      </NavLink>
-    </li>
+</HasPermission>
+
   </ul>
 </li>
 
+</HasPermission>
+
 {/* Stafffs or Users */}
+
+<HasPermission permission={["view-staffs","create-staff"]} mode = "any">
+  
 <li className={`dropdown mt-3 ${isStaffRoute ? "open" : ""}`}>
   <NavLink to="/staff-list" className="d-flex align-items-center gap-2">
    <Icon icon="flowbite:user-circle-outline" className="menu-icon" />
@@ -211,6 +231,24 @@ const isCustomerRoute =
       transition: "max-height 0.3s ease",
     }}
   >
+
+    <HasPermission permission = {"create-staff"}>
+        <li>
+      <NavLink
+        to="/add-staff"
+        className={({ isActive }) =>
+          isActive ? "active-page" : ""
+        }
+      >
+        <i className="ri-circle-fill circle-icon text-info-main w-auto" />
+        Add Staff
+      </NavLink>
+
+
+      
+        </li>
+      </HasPermission>
+      <HasPermission permission = {"view-staffs"}>
     <li>
       <NavLink
         to="/staff-list"
@@ -222,20 +260,15 @@ const isCustomerRoute =
         Staffs List
       </NavLink>
     </li>
+</HasPermission>
 
-    <li>
-      <NavLink
-        to="/add-staff"
-        className={({ isActive }) =>
-          isActive ? "active-page" : ""
-        }
-      >
-        <i className="ri-circle-fill circle-icon text-info-main w-auto" />
-        Add Staff
-      </NavLink>
-    </li>
   </ul>
 </li>
+
+</HasPermission>
+
+
+<HasPermission permission = {["view-projects","create-projects"]} mode = "any">
             {/* Projects */}
             <li className='dropdown mt-3'>
               <Link to='#'>
@@ -243,18 +276,7 @@ const isCustomerRoute =
                 <span>Projects</span>
               </Link>
               <ul className='sidebar-submenu'>
-                <li>
-                  <NavLink
-                    to='/projects-list'
-                    className={(navData) =>
-                      navData.isActive ? "active-page" : ""
-                    }
-                  >
-                    <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
-                    Project List
-                  </NavLink>
-                </li>
-
+                <HasPermission permission = {"create-projects"}>
                 <li>
                   <NavLink
                     to='/add-projects'
@@ -266,12 +288,27 @@ const isCustomerRoute =
                     Add Project
                   </NavLink>
                 </li>
+  </HasPermission>
+
+<HasPermission permission={"view-projects"}>
+  <li>
+    <NavLink
+      to='/projects-list'
+      className={(navData) => navData.isActive ? "active-page" : ""}
+    >
+      <i className='ri-circle-fill circle-icon text-primary-600 w-auto' />{" "}
+      Project List
+    </NavLink>
+  </li>
+</HasPermission>
+
               </ul>
             </li>
 
+</HasPermission>
 
         {/* Payments */}
-             <li className="mt-3">
+             {/* <li className="mt-3">
               <NavLink
                 to='/invoice-list'
                 className={(navData) => (navData.isActive ? "active-page" : "")}
@@ -279,15 +316,21 @@ const isCustomerRoute =
                 <Icon icon='hugeicons:invoice-03' className='menu-icon' />
                 <span>Payments</span>
               </NavLink>
-            </li>
+            </li> */}
 
+
+<HasPermission permission = {["manage-access","manage-roles"]} mode = "any">
             {/* Role & Access Dropdown */}
             <li className='dropdown mt-3'>
               <Link to='#'>
                 <i className='ri-user-settings-line' />
                 <span>Role &amp; Access</span>
               </Link>
+
+
               <ul className='sidebar-submenu'>
+
+                <HasPermission permission = {"manage-access"}>
                 <li>
                   <NavLink
                     to='/role-access'
@@ -299,6 +342,9 @@ const isCustomerRoute =
                     Role &amp; Access
                   </NavLink>
                 </li>
+</HasPermission>
+
+<HasPermission permission = {"manage-roles"}>
                 <li>
                   <NavLink
                     to='/assign-role'
@@ -310,11 +356,15 @@ const isCustomerRoute =
                     Assign Role
                   </NavLink>
                 </li>
+
+                </HasPermission>
               </ul>
             </li>
 
-            {/* Payments */}
-             <li>
+</HasPermission>
+
+            {/* Documents */}
+             {/* <li>
               <NavLink
                 to='/documents'
                 className={(navData) => (navData.isActive ? "active-page" : "")}
@@ -322,9 +372,12 @@ const isCustomerRoute =
                 <Icon icon='solar:document-add-outline' className='menu-icon' />
                 <span>Upload Documents</span>
               </NavLink>
-            </li>
+            </li> */}
 
             {/* Remainders and notifications */}
+
+            <HasPermission permission = {"manage-remainders"}>
+              
              <li className="mt-3">
               <NavLink
                 to='/notification'
@@ -334,16 +387,22 @@ const isCustomerRoute =
                 <span>Remainders & notifications</span>
               </NavLink>
             </li>
+            
+            </HasPermission>
+
+
+            <HasPermission permission = {"view-reports"}>
 
              <li className="mt-3">
               <NavLink
                 to='/reports'
                 className={(navData) => (navData.isActive ? "active-page" : "")}
-              >
+                >
                 <Icon icon='solar:chart-square-outline' className='menu-icon' />
                 <span>Reports</span>
               </NavLink>
             </li>
+                </HasPermission>
 
             {/* Authentication Dropdown */}
             <li className='dropdown mt-3'>

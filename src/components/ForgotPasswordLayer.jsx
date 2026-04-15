@@ -1,34 +1,32 @@
 import { Icon } from '@iconify/react/dist/iconify.js'
-import React from 'react'
 import { Link } from 'react-router-dom'
+import OtpInput from './child/OtpInput'
 
 const ForgotPasswordLayer = () => {
     return (
         <>
-            <section className="auth forgot-password-page bg-base d-flex flex-wrap">
-                <div className="auth-left d-lg-block d-none">
-                    <div className="d-flex align-items-center flex-column h-100 justify-content-center">
-                        <img src="assets/images/auth/forgot-pass-img.png" alt="" />
-                    </div>
-                </div>
+            <section className="auth forgot-password-page bg-base d-flex justify-content-center flex-wrap">
                 <div className="auth-right py-32 px-24 d-flex flex-column justify-content-center">
                     <div className="max-w-464-px mx-auto w-100">
-                        <div>
+                        <div className='d-flex flex-column align-items-center'>
+                            <Link to='/' className='mb-40 max-w-290-px'>
+              <img src='/assets/images/logo.png' alt='' />
+            </Link>
                             <h4 className="mb-12">Forgot Password</h4>
-                            <p className="mb-32 text-secondary-light text-lg">
-                                Enter the email address associated with your account and we will
-                                send you a link to reset your password.
+                            <p className="mb-32 text-secondary-light text-lg text-center">
+                                Enter the phone number associated with your account and we will
+                                send you a OTP to reset your password.
                             </p>
                         </div>
                         <form action="#">
                             <div className="icon-field">
                                 <span className="icon top-50 translate-middle-y">
-                                    <Icon icon="mage:email" />
+                                    <Icon icon="mage:phone" />
                                 </span>
                                 <input
-                                    type="email"
+                                    type="tel"
                                     className="form-control h-56-px bg-neutral-50 radius-12"
-                                    placeholder="Enter Email"
+                                    placeholder="Enter Phone"
                                 />
                             </div>
                             <button
@@ -43,14 +41,6 @@ const ForgotPasswordLayer = () => {
                                 <Link to="/sign-in" className="text-primary-600 fw-bold mt-24">
                                     Back to Sign In
                                 </Link>
-                            </div>
-                            <div className="mt-120 text-center text-sm">
-                                <p className="mb-0">
-                                    Already have an account?{" "}
-                                    <Link to="/sign-in" className="text-primary-600 fw-semibold">
-                                        Sign In
-                                    </Link>
-                                </p>
                             </div>
                         </form>
                     </div>
@@ -67,21 +57,17 @@ const ForgotPasswordLayer = () => {
                     <div className="modal-content radius-16 bg-base">
                         <div className="modal-body p-40 text-center">
                             <div className="mb-32">
-                                <img src="assets/images/auth/envelop-icon.png" alt="" />
+                               <img src='/assets/images/logo.png' alt='' />
                             </div>
                             <h6 className="mb-12">Verify your Email</h6>
                             <p className="text-secondary-light text-sm mb-0">
                                 Thank you, check your email for instructions to reset your password
                             </p>
-                            <button
-                                type="button"
-                                className="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32"
-                            >
-                                Skip
-                            </button>
+
+                            <OtpInput className = "mt-2"/>
                             <div className="mt-32 text-sm">
                                 <p className="mb-0">
-                                    Don’t receive an email?{" "}
+                                    Don’t receive a OTP?{" "}
                                     <Link to="/resend" className="text-primary-600 fw-semibold">
                                         Resend
                                     </Link>

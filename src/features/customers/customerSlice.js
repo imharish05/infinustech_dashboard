@@ -10,6 +10,7 @@ const initialState = {
         projectType: "Residential",
         budget: 250000,
         status: "Active",
+        role : "customers"
       },
     //   {
     //     id: 2,
@@ -71,7 +72,7 @@ const customerSlice = createSlice({
         },
         updateCustomer : (state,action) => {
             const index = state.customers.findIndex(
-                (c) => c.id == action.payload.id
+                (c) => String(c.id)=== String(action.payload.id)
             );
             if(index !== -1){
                 state.customers[index] = action.payload;
@@ -79,7 +80,7 @@ const customerSlice = createSlice({
         },
         deleteCustomer : (state,action) => {
             state.customers = state.customers.filter(
-                (c) => c.id != action.payload
+                (c) => String(c.id) !== String(action.payload)
             )
         }
     }

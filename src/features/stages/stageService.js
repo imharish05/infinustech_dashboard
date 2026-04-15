@@ -1,6 +1,6 @@
 import Swal from "sweetalert2";
 import api from "../../api/axios";
-import { setStages, addStage, recordStagePayment } from "./stageSlice";
+import { setStages, addStage, recordStagePayment, recordDocument, startDocumentUpload, uploadDocumentError, deleteDocumentSuccess } from "./stageSlice";
 
 /**
  * Fetch all stages for a specific project
@@ -116,9 +116,13 @@ export const recordStagePaymentFunction = async (dispatch, payload, stageId, pro
             confirmButtonColor: "#ea8b0c",
             timer: 2000
         });
+
+        return true
     } catch (err) {
         const message = err.response?.data?.message || "Unable to record payment";
         Swal.fire({ title: "Error!", text: message, icon: "error", confirmButtonColor: "#d33" });
+
+        return false;
     }
 
     // Response 
@@ -130,4 +134,59 @@ export const recordStagePaymentFunction = async (dispatch, payload, stageId, pro
 //     "status": "In Progress"
 //   }
 // }
+};
+
+
+export const recordDocumentFunction = async (dispatch, projectId, stageId, customerId, formData) => {
+  // Trigger loading UI
+  dispatch(startDocumentUpload());
+
+  try {
+    // const response = await axios.post(`/api/upload`, formData);
+    
+    // // Update data and stop loading
+    // dispatch(recordDocument({
+    //   projectId,
+    //   stageId,
+    //   data: response.data // Assuming this contains { file_path: "..." }
+    // }));
+
+        const file = formData.get("document"); 
+        
+        dispatch(recordDocument({
+            projectId,
+            stageId,
+            data: { 
+                file_path: file ? `uploads/${file.name}` : "dummy_path.pdf" 
+            }
+        }));
+    
+    return true;
+  } catch (error) {
+    dispatch(uploadDocumentError());
+    console.error("Upload failed", error);
+    return false;
+  }
+};
+
+
+export const deleteStageDocumentFunction = async (dispatch, projectId, stageId) => {
+  try {
+    // Replace with your actual API endpoint
+    // Assuming the backend needs projectId and stageId to locate the files
+    // const response = await api.delete(`/projects/${projectId}/stages/${stageId}/documents`);
+    
+    // if (response.status === 200) {
+    //   dispatch(deleteDocumentSuccess({ projectId, stageId }));
+    //   return true;
+    // }
+
+    dispatch(deleteDocumentSuccess({projectId,stageId}))
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    Swal.fire("Error", "Failed to delete files from server.", "error");
+    return false;
+  }
 };

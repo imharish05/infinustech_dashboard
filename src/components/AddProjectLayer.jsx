@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {useDispatch, useSelector} from "react-redux"
 import { addNewProject } from '../features/projects/projectService';
+import { toggleAssignmentFunction } from '../features/staff/staffService';
 
 const AddProjectLayer = () => {
     
@@ -20,7 +21,7 @@ const AddProjectLayer = () => {
         
         const handleCancel = () => {
             setProjectName("")
-            customerId("")
+            setCustomerId("")
             setCost("")
             setLocation("")
             setCustomerName("")
@@ -68,10 +69,17 @@ const filteredStaff = (staffList || []).filter(staff => {
                     id : crypto.randomUUID(),projectName,location,customerName,customerId,staffName : selectedStaffName,staffId : selectedStaffId,cost,projectType,status : "Initialized"
                 }
                 
-                console.log(payload);
-                
+            const success = await addNewProject(dispatch,payload)
+if (success) {
+           await toggleAssignmentFunction(
+                dispatch, 
+                selectedStaffId, 
+                payload.id, 
+                selectedStaffName, 
+                true
+            );
+        }
 
-            addNewProject(dispatch,payload)
             setProjectName("")
             setCost("")
             setLocation("")
@@ -171,7 +179,7 @@ const filteredStaff = (staffList || []).filter(staff => {
                                         {/* SEARCHABLE STAFF DROPDOWN */}
 <div className="mb-20 position-relative">
     <label className="form-label fw-semibold text-primary-light text-sm mb-8">
-        Assign Staff / Manager <span className="text-danger-600">*</span>
+        Assign Staff / Designer <span className="text-danger-600">*</span>
     </label>
     
     <div className="input-group">

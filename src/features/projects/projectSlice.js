@@ -1,5 +1,4 @@
-import {createSlice } from "@reduxjs/toolkit"
-import { updateCustomer } from "../customers/customerSlice"
+import {createSlice, current } from "@reduxjs/toolkit"
 
 const initialState = {
     projects : [
@@ -46,7 +45,7 @@ const projectSlice = createSlice({
         },
         updateProject : (state,action) => {
             const index = state.projects.findIndex(
-                (p) => p.id == action.payload.id
+                (p) => String(p.id) === String(action.payload.id)
             )
 
             if(!index !== -1){
@@ -55,34 +54,32 @@ const projectSlice = createSlice({
         },
        deleteProject : (state,action) => {
              state.projects = state.projects.filter(
-        (p) => p.id != action.payload // Use action.payload directly
-    )
-},
-assignStaffToProject: (state, action) => {
-    const { projectId, staffId, staffName } = action.payload;
-    
-    // Using find with loose equality or String() to ensure a match
-    const project = state.projects.find(p => String(p.id) === String(projectId));
-    
-    if (project) {
-        project.assignedStaffId = staffId;
-        project.assignedStaffName = staffName;
-    }
-}
-    },
+        (p) => String(p.id)!== String(action.payload) // Use action.payload directly
+        )},
 
-    removeStaffFromProject: (state, action) => {
-    const { projectId } = action.payload;
-    const project = state.projects.find((p) => String(p.id) === String(projectId));
-    
-    if (project) {
-        // Clear the assignment fields
-        project.assignedStaffId = null;
-        project.assignedStaffName = null;
+        assignStaffToProject : (state,action) => {
+            const {projectId,staffId,staffName} = action.payload;
+
+            const project  = state.projects.find((p)=> String(p.id) === String(projectId))
+            
+            if (project) {
+                project.assignedStaffId = staffId;
+                project.assignedStaffName = staffName;
+            }
+        },
+        unAssignStaffFromProject : (state,action) => {
+            const {projectId} = action.payload;
+
+            const project = state.projects.find((p)=> String(p.id) === String(projectId))
+
+            if(project){
+                project.assignedStaffId = null;
+                project.assignedStaffName = null;
+            }
+        }
     }
-},
 })
 
 
-export const {allProjects,addProjects,updateProject,deleteProject,assignStaffToProject,removeStaffFromProject} = projectSlice.actions;
+export const {allProjects,addProjects,updateProject,deleteProject,unAssignStaffFromProject,assignStaffToProject} = projectSlice.actions;
 export default projectSlice.reducer

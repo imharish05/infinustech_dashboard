@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, current } from "@reduxjs/toolkit";
 
 const initialState = {
     staffs : [
@@ -7,7 +7,10 @@ const initialState = {
         name: "Harish",
         address: "12, MG Road, T. Nagar, Chennai, Tamil Nadu - 600017",
         phone: "9876543210",
-        projectId : [""],
+        projects : [],
+        email : "sample@gmail.com",
+        password : "12345678",
+        role : "staff",
         status: "Active",
       },
       {
@@ -15,8 +18,11 @@ const initialState = {
         name: "Sam",
         address: "12, MG Road, T. Nagar, Chennai, Tamil Nadu - 600017",
         phone: "9876543210",
-        projectId : [""],
+        projects : [],
+        email : "sample@gmail.com",
+        password : "12345678",
         status: "Active",
+        role : "designer"
       }
     ]
 }
@@ -33,7 +39,7 @@ const staffSlice = createSlice({
         },
         updateStaff : (state,action) => {
             const index = state.staffs.findIndex(
-                (c) => c.id == action.payload.id
+                (c) => String(c.id) === String(action.payload.id)
             );
             if(index !== -1){
                 state.staffs[index] = action.payload;
@@ -41,37 +47,32 @@ const staffSlice = createSlice({
         },
         deleteStaff : (state,action) => {
             state.staffs = state.staffs.filter(
-                (c) => c.id != action.payload
+                (c) => String(c.id) !== String(action.payload)
             )
         },
         assignProjectToStaff: (state, action) => {
             const { staffId, projectId } = action.payload;
-            const staff = state.staffs.find((s) => s.id == staffId);
-            
+
+            const staff = state.staffs.find((s) => String(s.id) === String(staffId));
+
             if (staff) {
-                // Initialize array if it doesn't exist
-                if (!staff.projectId) {
-                    staff.projectId = [];
-                }
-                // Only add if the project isn't already assigned
-                if (!staff.projectId.includes(projectId)) {
-                    staff.projectId.push(projectId);
-                }
+                if (!staff.projects) staff.projects = [];
+                if (!staff.projects.includes(projectId)) staff.projects.push(projectId);
             }
         },
-        unassignProjectFromStaff: (state, action) => {
-        const { staffId, projectId } = action.payload;
-        const staff = state.staffs.find((s) => String(s.id) === String(staffId));
-    
-        if (staff && staff.projects) {
-        // Remove the specific project ID from the array
-        staff.projects = staff.projects.filter((id) => String(id) !== String(projectId));
-    }
-},
+        unAssignProjectFromStaff : (state,action) => {
+            const {staffId,projectId} = action.payload;
+
+            const staff = state.staffs.find((s) =>String(s.id) === String(staffId))
+
+            if(staff && staff.projects){
+                staff.projects = staff.projects.filter((p) => String(p.id) !== String(projectId))
+            }
+        }
     }
 })
 
 
-export const {addStaff,updateStaff,deleteStaff,allStaffs,assignProjectToStaff,unassignProjectFromStaff} = staffSlice.actions;
+export const {addStaff,updateStaff,deleteStaff,allStaffs,assignProjectToStaff,unAssignProjectFromStaff} = staffSlice.actions;
 
 export default staffSlice.reducer;
