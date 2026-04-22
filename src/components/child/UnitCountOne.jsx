@@ -4,37 +4,58 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchTotalCollectedAmount } from '../../features/stages/stageService';
 
 const UnitCountOne = () => {
-    // Defaulting to empty arrays ensures .length and .reduce don't crash on initial load
+    const dispatch = useDispatch();
+
+    // 1. Pull data from Redux
+    const { user } = useSelector((state) => state.auth); // Logged in User (ID: 30)
+    const { staffs = [] } = useSelector((state) => state.staffs); // List of staff members
     const { customers = [] } = useSelector((state) => state.customers);
     const { projects = [] } = useSelector((state) => state.projects);
-    const { payments = [] } = useSelector((state) => state.payments);
-
-
-    const dispatch = useDispatch()
+    const { totalCollected: paidAmount } = useSelector((state) => state.stages);
 
     useEffect(() => {
-    fetchTotalCollectedAmount(dispatch);
-  }, [dispatch])
+        fetchTotalCollectedAmount(dispatch);
+    }, [dispatch]);
 
-  const {totalCollected : paidAmount} = useSelector((state) => state.stages)
+    const isAdmin = user?.role === 'admin';
 
-    // 1. Count Completed Projects
+    // 2. FIND THE STAFF ID FOR THE LOGGED-IN USER
+    // The project stores 'assignedStaffId' (e.g., 12), not the 'userId' (e.g., 30).
+    const currentStaffMember = useMemo(() => {
+        if (isAdmin) return null;
+        return staffs.find(s => Number(s.userId) === Number(user?.id));
+    }, [staffs, user, isAdmin]);
+
+    const myStaffId = currentStaffMember?.id; // This would be 12 in your example
+
+    // 3. FILTER PROJECTS
+    const filteredProjects = useMemo(() => {
+        if (isAdmin) return projects;
+        if (!myStaffId) return []; // If staff record not found yet, return empty
+        
+        return projects.filter(project => 
+            Number(project.assignedStaffId) === Number(myStaffId)
+        );
+    }, [projects, myStaffId, isAdmin]);
+
+    // 4. FILTER CUSTOMERS
+    const filteredCustomersCount = useMemo(() => {
+        if (isAdmin) return customers.length;
+        
+        // Count unique customers from the projects assigned to me
+        const customerIds = new Set(filteredProjects.map(p => String(p.customerId)));
+        return customerIds.size;
+    }, [customers, filteredProjects, isAdmin]);
+
+    // 5. CALCULATE STATS
     const completedProjectsCount = useMemo(() => {
-        return projects.filter(project => project.status === "Completed").length;
-    }, [projects]);
+        return filteredProjects.filter(p => p.status === "Completed").length;
+    }, [filteredProjects]);
 
-    // 2. Calculate Total Project Revenue
     const totalAmount = useMemo(() => {
-        return projects.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0);
-    }, [projects]);
+        return filteredProjects.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0);
+    }, [filteredProjects]);
 
-
-    // 4. Calculate Pending Balance
-    const totalPendingPayments = useMemo(() => {
-        return totalAmount - paidAmount;
-    }, [totalAmount, paidAmount]);
-
-    // Reusable formatter for Currency
     const formatCurrency = (amount) => {
         return new Intl.NumberFormat("en-IN", {
             style: "currency",
@@ -45,25 +66,22 @@ const UnitCountOne = () => {
 
     return (
         <div className="row row-cols-xxxl-5 row-cols-lg-3 row-cols-sm-2 row-cols-1 gy-4">
-            {/* Total Customers */}
             <StatCard 
-                title="Total Customers" 
-                value={customers.length} 
+                title={isAdmin ? "Total Customers" : "My Customers"} 
+                value={filteredCustomersCount} 
                 icon="gridicons:multiple-users" 
                 colorClass="bg-cyan" 
                 bgClass="bg-gradient-start-1" 
             />
 
-            {/* Total Projects */}
             <StatCard 
-                title="Total Projects" 
-                value={projects.length} 
+                title={isAdmin ? "Total Projects" : "Assigned Projects"} 
+                value={filteredProjects.length} 
                 icon="fa-solid:award" 
                 colorClass="bg-purple" 
                 bgClass="bg-gradient-start-2" 
             />
 
-            {/* Completed Projects */}
             <StatCard 
                 title="Completed Projects" 
                 value={completedProjectsCount} 
@@ -72,32 +90,24 @@ const UnitCountOne = () => {
                 bgClass="bg-gradient-start-4" 
             />
 
-            {/* Total Amount */}
-            <StatCard 
-                title="Total Fees" 
-                value={formatCurrency(totalAmount)} 
-                icon="solar:wallet-bold" 
-                colorClass="bg-info-main" 
-                bgClass="bg-gradient-start-3" 
-            />
-
-            {/* Total Collected */}
-            <StatCard 
-                title="Total Collected" 
-                value={formatCurrency(paidAmount)} 
-                icon="solar:cash-out-bold" 
-                colorClass="bg-success-main" 
-                bgClass="bg-gradient-start-4" 
-            />
-
-            {/* Pending Payments */}
-            <StatCard 
-                title="Pending Fees" 
-                value={formatCurrency(totalPendingPayments)} 
-                icon="fa6-solid:file-invoice-dollar" 
-                colorClass="bg-red" 
-                bgClass="bg-gradient-start-5" 
-            />
+            {(isAdmin || user?.permissions?.includes('manage-payment')) && (
+                <>
+                    <StatCard 
+                        title="Total Fees" 
+                        value={formatCurrency(totalAmount)} 
+                        icon="solar:wallet-bold" 
+                        colorClass="bg-info-main" 
+                        bgClass="bg-gradient-start-3" 
+                    />
+                    <StatCard 
+                        title="Total Collected" 
+                        value={formatCurrency(paidAmount)} 
+                        icon="solar:cash-out-bold" 
+                        colorClass="bg-success-main" 
+                        bgClass="bg-gradient-start-4" 
+                    />
+                </>
+            )}
         </div>
     );
 };

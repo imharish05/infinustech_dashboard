@@ -25,7 +25,7 @@ const AddProjectLayer = () => {
 
 const handleAddNewType = async () => {
     const { value: newType } = await Swal.fire({
-        title: 'Add New Project Type',
+        title: '<span style="font-size: 25px">Add New stage</span>',
         input: 'text',
         inputLabel: 'Type Name',
         inputPlaceholder: 'e.g. Industrial, Renovation...',
@@ -238,7 +238,7 @@ const validate = () => {
                                                 type="text"
                                                 className="form-control radius-8"
                                                 id="projectName"
-                                                required
+                                                
                                                 value={projectName}
                                                 onChange={(e) => setProjectName(e.target.value)}
                                                 placeholder="Enter Project Name"
@@ -347,7 +347,7 @@ const validate = () => {
         id="depart"
         value={projectType || "Select the project type"}
         onChange={(e) => setProjectType(e.target.value)}
-        required
+        
     >
         <option value="Select the project type" disabled>Select the project type</option>
         {customProjectTypes.map((type) => (

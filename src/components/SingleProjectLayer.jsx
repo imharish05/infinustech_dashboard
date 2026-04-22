@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import { 
   addStageFunction, 
   deleteStageDocumentFunction, 
+  fetchAllStagesForStats, 
   individualStages, 
   recordDocumentFunction, 
   recordStagePaymentFunction, 
@@ -278,31 +279,35 @@ const recordPayment = async (stageId, stageAmount, stagePaid) => {
     }
   });
 
-  if (formValues) {
-    const payload = { 
-        amount: formValues.paymentAmount, 
-        payment_mode: formValues.paymentMode, 
-        payment_date: new Date().toISOString(),
-        customerId: customerId,
-        budget: totals.cost,
-        customerName: currentProject?.customerName || "N/A",
-        projectName: currentProject?.projectName || "N/A",
-        payment_status: (formValues.paymentAmount >= stageRemaining) ? "Paid" : "Partially Paid",
-        stage_amount: stageAmount 
-    };
+ if (formValues) {
+        Swal.showLoading(); // Prevent double clicks
+        
+        const payload = { 
+            amount: formValues.paymentAmount, 
+            payment_mode: formValues.paymentMode, 
+            payment_date: new Date().toISOString(),
+            customerId: customerId,
+            budget: totals.cost,
+            customerName: currentProject?.customerName || "N/A",
+            projectName: currentProject?.projectName || "N/A",
+            payment_status: (formValues.paymentAmount >= stageRemaining) ? "Paid" : "Partially Paid",
+            stage_amount: stageAmount 
+        };
 
-   await recordStagePaymentFunction(dispatch,payload,stageId,id)
+        // ONLY CALL THIS ONE FUNCTION
+        const success = await stagePaymentCollection(dispatch, payload, stageId, id);
 
-    // Use stagePaymentCollection as the primary recorder
-    const success = await stagePaymentCollection(dispatch, payload, stageId, id);
-
-    if (success) { 
-      setIsDocumentUploaded(false); 
-      setUploadedFile(null); 
-      individualStages(dispatch, id);
-      Swal.fire("Success", "Payment recorded successfully", "success");
+        if (success) { 
+            setIsDocumentUploaded(false); 
+            setUploadedFile(null); 
+            
+            // Refresh the individual stages to get the updated "paid" amount from the DB
+            await individualStages(dispatch, id); 
+            await fetchAllStagesForStats(dispatch);
+            
+            Swal.fire("Success", "Payment recorded successfully", "success");
+        }
     }
-  }
 };
 
   const clearFileSelection = async (stageId) => {
@@ -367,9 +372,6 @@ const openPreviewModal = (stage) => {
         showConfirmButton: false 
     });
 };
-
-
-
 const updateStatus = async (stageId, currentStatus) => {
   const { value: newStatus } = await Swal.fire({
     title: '<span style="font-size: 25px">Update Status</span>',

@@ -41,9 +41,7 @@ export const addStageFunction = async (dispatch, payload, projectId) => {
     const loadingToast = toast.loading("Adding new stage...");
     try {
 
-        console.log(payload);
-        
-
+    
         const res = await api.post(`/stages/add-stage/${projectId}`, payload);
         
         dispatch(addStage({ 

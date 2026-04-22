@@ -53,7 +53,7 @@ function App() {
         {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>
         <Route path='*' element={<ErrorPage />} />
-          <Route path='/' element={<HasPermission permission="view-admin"><HomePageOne /></HasPermission>} />
+          <Route path='/' element={<HasPermission permission={["view-admin", "view-dashboard"]}><HomePageOne /></HasPermission>} />
           <Route path='/projects-list' element={<HasPermission permission="view-projects"><ProjectListPage /></HasPermission>} />
           <Route path='/add-projects' element={<HasPermission permission="create-projects"><AddProjectPage /></HasPermission>} />
           <Route path='/edit-project/:id' element={<HasPermission permission="edit-projects"><EditProjectPage /></HasPermission>} />

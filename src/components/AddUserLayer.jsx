@@ -116,7 +116,8 @@ const AddUserLayer = () => {
                                                 type="text"
                                                 className="form-control radius-8"
                                                 id="name"
-                                                required
+                                                
+
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
                                                 placeholder="Enter Full Name"
@@ -150,7 +151,7 @@ const AddUserLayer = () => {
                                             value={phone}
                                                 onChange={(e) =>handlePhoneChange(e)}
                                                 type="tel"
-                                                required
+                                                
                                                 className="form-control radius-8"
                                                 id="number"
                                                 placeholder="Enter phone number"

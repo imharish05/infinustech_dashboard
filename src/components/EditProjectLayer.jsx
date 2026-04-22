@@ -62,7 +62,7 @@ const EditProjectLayer = () => {
     // New Type Handler
     const handleAddNewType = async () => {
         const { value: newType } = await Swal.fire({
-            title: 'Add New Project Type',
+            title: '<span style="font-size: 25px">Add New stage</span>',
             input: 'text',
             inputLabel: 'Type Name',
             inputPlaceholder: 'e.g. Industrial, Renovation...',
@@ -218,6 +218,7 @@ const EditProjectLayer = () => {
                                                 <option value="Initialized">Initialized</option>
                                                 <option value="In Progress">In Progress</option>
                                                 <option value="Completed">Completed</option>
+                                                <option value="On Hold">On Hold</option>
                                             </select>
                                         </div>
                                     </div>

@@ -41,6 +41,36 @@ const MasterLayout = () => {
     }).format(validAmount);
   };
 
+  // Raminder fetcher
+
+  const lastRunRef = useRef()
+
+useEffect(() => {
+  const checkTime = () => {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    
+    const currentTime = `${hours}:${minutes}`;
+    
+    // Tip: Use strings that match your hours:minutes exactly
+    const targetTimes = ["6:30", "12:30", "18:30"];
+
+    if (targetTimes.includes(currentTime)) {
+      if (lastRunRef.current !== currentTime) {
+        lastRunRef.current = currentTime;
+        fetchPaymentReminders(dispatch);
+      }
+    }
+  };
+
+  
+  const interval = setInterval(checkTime, 1000); 
+
+  return () => clearInterval(interval);
+}, [dispatch]);
+
+
   // Sync stages to payment reminders
 // CHANGE this useEffect in MasterLayout:
 useEffect(() => {

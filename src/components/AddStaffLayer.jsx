@@ -74,7 +74,7 @@ const validate = () => {
             };
 
             addStaffFunction(dispatch, payload);
-            navigate(-1);
+            navigate("/staff-list");
         } catch (err) {
             console.error("Error adding staff:", err.message);
         }
@@ -183,24 +183,28 @@ const validate = () => {
         </select>
         
         <div className="position-absolute end-0 top-50 translate-middle-y me-12 pt-8 pointer-events-none">
-            <Icon 
-                icon={role === "Designer" ? "lucide:palette" : role === "Staff" ? "lucide:users" : "lucide:chevron-down"} 
-                className={`${errors.role ? 'text-danger' : 'text-primary-light'} text-lg`} 
-            />
-        </div>
+    {/* Only render the Icon if role has a value */}
+    {role && (
+        <Icon 
+            icon={role === "designer" ? "lucide:palette" : "lucide:users"} 
+            className={`${errors.role ? 'text-danger' : 'text-primary-light'} text-lg`} 
+        />
+    )}
+</div>
     </div>
     
     {/* Error Message */}
     <ErrorMsg field="role" />
 
     {/* Helper text - hidden if there is an active error */}
-    {!errors.role && role && (
-        <div className="text-secondary-light mt-4" style={{ fontSize: '11px' }}>
-            {role === "Designer" 
-                ? "Designers can manage blueprints and technical specifications." 
-                : "Staff can be assigned to site projects and track progress."}
-        </div>
-    )}
+{!errors.role && role && (
+    <div className="text-secondary-light mt-4" style={{ fontSize: '11px' }}>
+        {/* Match lowercase values here too */}
+        {role === "designer" 
+            ? "Designers can manage blueprints and technical specifications." 
+            : "Staff can be assigned to site projects and track progress."}
+    </div>
+)}
 </div>
 
                                     

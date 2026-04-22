@@ -164,7 +164,7 @@ const ProjectListLayer = () => {
                 <th>Project Type</th>
                 <th>Total Fees</th>
                 <th>Status</th>
-                <HasPermission permission={["edit-projects", "delete-projects", "view-projects"]} mode="any">
+                <HasPermission permission={["edit-projects", "delete-projects"]} mode="any">
                   <th className="text-center">Action</th>
                 </HasPermission>
               </tr>
