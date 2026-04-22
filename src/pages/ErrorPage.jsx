@@ -1,8 +1,15 @@
 import React from 'react'
+import Breadcrumb from '../components/Breadcrumb'
+import ErrorLayer from '../components/ErrorLayer'
 
 const ErrorPage = () => {
   return (
-    <div>ErrorPage</div>
+    <>
+    <Breadcrumb title={"Error Page"}/>
+
+    <ErrorLayer/>
+    
+    </>
   )
 }
 

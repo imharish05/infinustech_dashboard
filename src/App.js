@@ -49,10 +49,10 @@ function App() {
         {/* Public Routes */}
         <Route path='/sign-in' element={<SignInPage />} />
         <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-        <Route path='*' element={<ErrorPage />} />
 
         {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>
+        <Route path='*' element={<ErrorPage />} />
           <Route path='/' element={<HasPermission permission="view-admin"><HomePageOne /></HasPermission>} />
           <Route path='/projects-list' element={<HasPermission permission="view-projects"><ProjectListPage /></HasPermission>} />
           <Route path='/add-projects' element={<HasPermission permission="create-projects"><AddProjectPage /></HasPermission>} />

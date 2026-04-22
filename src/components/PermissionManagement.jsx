@@ -36,6 +36,7 @@ const availablePermissions = [
     { id: 'create-projects', label: 'Create Projects' },
     { id: 'edit-projects', label: 'Edit Projects' },
     { id: 'delete-projects', label: 'Delete Projects' },
+    { id: 'view-stages', label: 'View Stages' },
     { id: 'upload-docs', label: 'Upload Documents' },
     { id: 'manage-access', label: 'Manage Access' }, // Changed label from 'Manage Roles'
     { id: 'manage-roles', label: 'Manage Roles' },

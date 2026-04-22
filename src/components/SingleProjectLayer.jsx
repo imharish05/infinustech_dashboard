@@ -497,6 +497,7 @@ const updateStatus = async (stageId, currentStatus) => {
                       </div>
                     </div>
 
+                    <HasPermission permission={"view-stages"}>
                     <div className="col-xl-6 col-lg-5">
                       <div className="d-flex bg-neutral-50 p-12 radius-8 border">
                         <div className="text-center flex-fill border-end">
@@ -513,6 +514,7 @@ const updateStatus = async (stageId, currentStatus) => {
                         </div>
                       </div>
                     </div>
+                    </HasPermission>
                   </div>
                 </div>
               );
