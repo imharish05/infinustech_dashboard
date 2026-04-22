@@ -55,12 +55,15 @@ const availablePermissions = [
     };
 
     // 5. Handle Save (The awaited service call)
-    const handleSave = async () => {
-        const success = await savePermissionsFunction(rolePermissions);
-        if (success) {
-            console.log("Permissions synced with server successfully.");
-        }
+const handleSave = async () => {
+    // Create a copy of permissions to ensure Admin is truly "Full Access"
+    const updatedPermissions = {
+        ...rolePermissions,
+        admin: availablePermissions.map(p => p.id) // Force admin to have everything
     };
+    
+    const success = await savePermissionsFunction(updatedPermissions);
+};
 
     return (
         <div className="container-fluid p-24">

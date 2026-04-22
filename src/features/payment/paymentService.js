@@ -13,9 +13,6 @@ import Swal from "sweetalert2";
 export const stagePaymentCollection = async (dispatch, paymentData, stageId, projectId) => {
     dispatch(recordPaymentStart());
 
-    console.log(paymentData);
-    
-
     try {
         // paymentData now includes payment_status and stage_amount from the frontend
         const response = await api.post("/payments/record", {

@@ -89,6 +89,22 @@ const SingleProjectLayer = () => {
     });
   }, [stagesList]);
 
+  // Date fromat
+
+ const formatDate = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  
+  return new Intl.DateTimeFormat("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
+};
+
   // --- CORRECTED FILE UPLOAD LOGIC ---
   const fileUpload = (stageId) => {
     const mainInput = document.createElement("input");
@@ -215,7 +231,7 @@ const SingleProjectLayer = () => {
             Swal.showValidationMessage("Please check all required fields and budget limits");
             return false;
         }
-        return [name, desc, amt, duration];
+        return [name, desc, amt, duration || null];
       }
     });
 
@@ -225,7 +241,7 @@ const SingleProjectLayer = () => {
     stage_Name: formValues[0], 
     description: formValues[1], 
     amount: formValues[2],
-    duration: formValues[3]
+    duration: formValues[3] || null
   }, id);
 
   if (success) {
@@ -455,6 +471,12 @@ const updateStatus = async (stageId, currentStatus) => {
                         </HasPermission>
                       </div>
                       <p className="text-secondary-light text-sm mb-12">{stage.description}</p>
+                      {
+                        stage.duration ? 
+                        <p className="text-secondary-light text-sm mb-12">Due : {formatDate(stage.duration)}</p>
+                        : null
+                      }
+
                       
                       <div className="d-flex flex-column flex-md-row gap-4">
                         {index === activeStageIndex && (
