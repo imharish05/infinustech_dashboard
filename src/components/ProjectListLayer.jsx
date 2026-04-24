@@ -13,7 +13,7 @@ const ProjectListLayer = () => {
   // 1. Redux Selectors
   const customers = useSelector((state) => state.customers.customers);
   const projectList = useSelector((state) => state.projects.projects);
-  const serverTotalPages = useSelector((state) => state.projects.totalPages); // From Redux
+  const serverTotalPages = useSelector((state) => state.projects.totalPages);
   const staffList = useSelector((state) => state.staffs.staffs);
   const { user } = useSelector((state) => state.auth);
   const hasPermission = user?.permissions || [];
@@ -29,6 +29,7 @@ const ProjectListLayer = () => {
     getAllProjects(dispatch, currentPage, itemsPerPage);
   }, [dispatch, currentPage, itemsPerPage]);
 
+  // --- HELPER FUNCTIONS MOVED UP TO PREVENT INITIALIZATION ERROR ---
   const formatCurrency = (amount) => {
     if (amount == null) return "—";
     return new Intl.NumberFormat("en-IN", {
@@ -40,7 +41,7 @@ const ProjectListLayer = () => {
 
   const getCustomerName = (customerId) => {
     if (!customers || customers.length === 0) return "Loading...";
-    const customer = customers.find((c) => Number(c.id) === Number(customerId));
+    const customer = customers.find((c) => String(c.id) === String(customerId));
     return customer ? customer.name : "Unassigned";
   };
 
@@ -59,9 +60,25 @@ const ProjectListLayer = () => {
     }
   };
 
-  // 4. Client-side Search/Filter
+  // --- ROLE AND STAFF FILTER LOGIC ---
+  const isAdmin = user?.role?.toLowerCase() === "admin" || user?.role === "Super Admin";
+  
+  const myStaffRecord = useMemo(() => {
+    if (isAdmin) return null;
+    return (staffList || []).find(s => String(s.userId) === String(user?.id));
+  }, [staffList, user, isAdmin]);
+
+  const myStaffId = myStaffRecord?.id;
+
+  // --- FILTERED PROJECTS (Now helper functions exist before this is called) ---
   const filteredProjects = useMemo(() => {
-    return (projectList || []).filter((project) => {
+    let list = projectList || [];
+
+    if (!isAdmin) {
+      list = list.filter(project => String(project.assignedStaffId) === String(myStaffId));
+    }
+
+    return list.filter((project) => {
       const name = project?.projectName || "";
       const location = project?.location || "";
       const customerName = getCustomerName(project?.customerId) || "";
@@ -78,7 +95,7 @@ const ProjectListLayer = () => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [projectList, searchTerm, statusFilter, customers, staffList]);
+  }, [projectList, searchTerm, statusFilter, customers, staffList, isAdmin, myStaffId]);
 
   const handleView = (id) => navigate(`/projects/${id}`);
   const handleEdit = (id) => navigate(`/edit-project/${id}`);
@@ -164,7 +181,7 @@ const ProjectListLayer = () => {
                 <th>Project Type</th>
                 <th>Total Fees</th>
                 <th>Status</th>
-                <HasPermission permission={["edit-projects", "delete-projects"]} mode="any">
+                <HasPermission permission={["edit-projects", "delete-projects","view-projects"]} mode="any">
                   <th className="text-center">Action</th>
                 </HasPermission>
               </tr>
@@ -216,7 +233,7 @@ const ProjectListLayer = () => {
                   </tr>
                 ))
               ) : (
-                <tr><td colSpan="8" className="text-center py-4">No projects found.</td></tr>
+                <tr><td colSpan="9" className="text-center py-4">No projects found.</td></tr>
               )}
             </tbody>
           </table>

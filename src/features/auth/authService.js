@@ -2,6 +2,42 @@ import api from "../../api/axios";
 import { loginStart, loginSuccess, loginFailure, logout } from "./authSlice";
 import toast from 'react-hot-toast'; // Import toast
 
+
+
+export const signupFunction = async (dispatch, navigate, userData) => {
+    dispatch(loginStart());
+
+    // Create a loading toast
+    const loadToast = toast.loading('Creating your account...');
+
+    try {
+        // Send POST request to /auth/signup
+        const res = await api.post("/auth/signup", userData); 
+
+        // On success, we treat it like a login: save user data and token
+        dispatch(loginSuccess(res.data));
+
+        toast.success(`Account created! Welcome, ${res.data.user.name}`, {
+            id: loadToast,
+        });
+
+        // Redirect to dashboard or home
+        navigate("/");
+
+    } catch (err) {
+        const errorMessage = err.response?.data?.message || "Registration failed";
+        
+        toast.error(errorMessage, {
+            id: loadToast,
+        });
+
+        if (typeof loginFailure === 'function') {
+            dispatch(loginFailure(errorMessage));
+        }
+    }
+};
+
+
 export const loginFunction = async (dispatch, navigate, { phone, password }) => {
     dispatch(loginStart());
 

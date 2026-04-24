@@ -22,7 +22,7 @@ const PermissionManagement = () => {
 
 const availablePermissions = [
     { id: 'view-admin', label: 'View Admin Dashboard' },
-    { id: 'view-dashboard', label: 'View Dashboard' },
+    { id: 'view-dashboard', label: 'View Employee Dashboard' },
     { id: 'change-status', label: 'Change Status' },
     { id: 'view-staffs', label: 'View Staff' },
     { id: 'create-staff', label: 'Create Staff' },
@@ -38,8 +38,7 @@ const availablePermissions = [
     { id: 'delete-projects', label: 'Delete Projects' },
     { id: 'view-stages', label: 'View Stages' },
     { id: 'upload-docs', label: 'Upload Documents' },
-    { id: 'manage-access', label: 'Manage Access' }, // Changed label from 'Manage Roles'
-    { id: 'manage-roles', label: 'Manage Roles' },
+    { id: 'manage-permissions', label: 'Manage permissions' }, // Changed label from 'Manage Roles'
     { id: 'manage-remainders', label: 'Manage Reminders' }, // Changed label from 'Manage Roles'
     { id: 'view-reports', label: 'View Reports' },
     { id: 'manage-payment', label: 'Manage Payment' },

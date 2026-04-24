@@ -8,7 +8,8 @@ import {
     setTotalCollected,
     setAllStages
 } from "./stageSlice";
-import { toast } from "react-hot-toast"; // 1. Import toast
+import { toast } from "react-hot-toast";
+import { addSocketNotification } from "../notification/notificationSlice"; // 👈 ADD THIS IMPORT
 
 /**
  * Fetch stages for one specific project
@@ -17,8 +18,6 @@ export const individualStages = async (dispatch, projectId) => {
     dispatch(setLoading(true));
     try {
         const res = await api.get(`/stages/project/${projectId}`);
-
-        // Sync Redux with the actual DB data
         dispatch(setStages(res.data));
     } catch (err) {
         const message = err.response?.data?.message || "Unable to fetch project stages";
@@ -28,9 +27,8 @@ export const individualStages = async (dispatch, projectId) => {
             icon: "error",
             confirmButtonColor: "#d33",
         });
-    }
-    finally {
-        dispatch(setLoading(false)); // STOP
+    } finally {
+        dispatch(setLoading(false));
     }
 };
 
@@ -40,15 +38,11 @@ export const individualStages = async (dispatch, projectId) => {
 export const addStageFunction = async (dispatch, payload, projectId) => {
     const loadingToast = toast.loading("Adding new stage...");
     try {
-
-    
         const res = await api.post(`/stages/add-stage/${projectId}`, payload);
-        
         dispatch(addStage({ 
             projectId, 
             stage: res.data.stage 
         }));
-
         toast.success("Stage added successfully!", { id: loadingToast });
         return true;
     } catch (err) {
@@ -57,6 +51,7 @@ export const addStageFunction = async (dispatch, payload, projectId) => {
         return false;
     }
 };
+
 /**
  * Record payment and update stage status in DB and Redux
  */
@@ -77,6 +72,19 @@ export const recordStagePaymentFunction = async (dispatch, payload, stageId, pro
         }));
 
         toast.success("Payment balance updated!", { id: loadingToast });
+
+        // 👇 ADD THIS BLOCK — fires notification if stage is completed but still unpaid
+        if (res.data.reminder) {
+            dispatch(addSocketNotification({
+                id: `pay-${stageId}-${Date.now()}`,
+                title: 'Payment Pending',
+                message: `Stage is completed but balance remains unpaid.`,
+                projectId: projectId,
+                timestamp: new Date().toISOString(),
+            }));
+        }
+        // 👆 END OF NEW BLOCK
+
         return true;
     } catch (err) {
         const message = err.response?.data?.message || "Unable to record payment";
@@ -89,29 +97,23 @@ export const recordStagePaymentFunction = async (dispatch, payload, stageId, pro
  * Upload CAD/PDF/Images to the server and update Redux path
  */
 export const recordDocumentFunction = async (dispatch, projectId, stageId, customerId, formData) => {
-    // 1. Show the loading toast
- 
     dispatch(startDocumentUpload());
-
     try {
-        // 2. Make sure the headers are set for multipart
         const res = await api.post(`/stages/upload-document/${stageId}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
         });
-        
         dispatch(recordDocument({
             projectId,
             stageId,
             data: { file_path: res.data.file_path } 
         }));
-
         return true;
     } catch (error) {
         dispatch(uploadDocumentError());
-        const message = error.response?.data?.message || "Upload failed"
         return false;
     }
 };
+
 /**
  * Delete document from server and clear path in Redux
  */
@@ -120,7 +122,6 @@ export const deleteStageDocumentFunction = async (dispatch, projectId, stageId) 
     try {
         await api.delete(`/stages/delete-document/${stageId}`);
         dispatch(deleteDocumentSuccess({ projectId, stageId }));
-        
         toast.success("Document deleted!", { id: loadingToast });
         return true;
     } catch (error) {
@@ -144,6 +145,19 @@ export const updateStageStatusFunction = async (dispatch, data, stageId, project
         }));
 
         toast.success("Status updated!", { id: loadingToast });
+
+        // 👇 ADD THIS BLOCK — fires notification when stage is manually set to Completed but unpaid
+        if (res.data.reminder) {
+            dispatch(addSocketNotification({
+                id: `stage-${stageId}-${Date.now()}`,
+                title: 'Payment Pending',
+                message: `Stage completed but payment is still due.`,
+                projectId: projectId,
+                timestamp: new Date().toISOString(),
+            }));
+        }
+        // 👆 END OF NEW BLOCK
+
         return true;
     } catch (error) {
         toast.error("Status update failed.", { id: loadingToast });
@@ -151,28 +165,30 @@ export const updateStageStatusFunction = async (dispatch, data, stageId, project
     }
 };
 
-
+/**
+ * Fetch total collected amount
+ */
 export const fetchTotalCollectedAmount = async (dispatch) => {
-  try {
-    const response = await api.get("/stages/total-paid"); // Matches the route we created
-    if (response.data.success) {
-      dispatch(setTotalCollected(response.data.totalCollected));
-      return response.data.totalCollected;
+    try {
+        const response = await api.get("/stages/total-paid");
+        if (response.data.success) {
+            dispatch(setTotalCollected(response.data.totalCollected));
+            return response.data.totalCollected;
+        }
+    } catch (error) {
+        console.error("Error fetching total collected:", error);
+        return 0;
     }
-  } catch (error) {
-    console.error("Error fetching total collected:", error);
-    return 0;
-  }
 };
 
-// stageActions.js
+/**
+ * Fetch all stages for stats/notifications
+ */
 export const fetchAllStagesForStats = async (dispatch) => {
     try {
         const res = await api.get("/stages/all-stages");
-        // We'll create a new reducer 'setAllStages' for this
         dispatch(setAllStages(res.data.stages));
     } catch (err) {
         console.error("Chart data fetch failed", err);
     }
 };
-

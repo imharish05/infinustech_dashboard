@@ -187,127 +187,156 @@ const SingleProjectLayer = () => {
   };
 
   // --- KEEPING OTHER ACTIONS UNCHANGED ---
-  const addNewStage = async () => {
-    const totalAllocated = stagesList.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
-    const remainingBudgetToAllocate = Number(totals.cost) - totalAllocated;
-    if (remainingBudgetToAllocate <= 0) {
-      Swal.fire("Full", "Total budget has already been allocated to stages.", "info");
-      return;
-    }
-
-    const { value: formValues } = await Swal.fire({
-      title: '<span style="font-size: 25px">Add New Stage</span>',
-      width: window.innerWidth < 500 ? '95%' : '450px',
-      html: `
-        <div class="text-start">
-          <p class="text-primary-600 fw-bold mb-10" style="font-size: 12px;">Available to Allocate: ${formatCurrency(remainingBudgetToAllocate)}</p>
-          <div class="mb-3">
-            <label class="text-xs fw-bold mb-1">Stage Name</label>
-            <input id="swal-input1" class="form-control text-sm" placeholder="e.g. Fabrication">
-            <div id="error-name" class="text-danger d-none" style="font-size: 11px; margin-top: 4px;">Stage name is required.</div>
-          </div>
-          <div class="mb-3">
-            <label class="text-xs fw-bold mb-1">Description</label>
-            <textarea id="swal-input2" class="form-control text-sm" rows="2" placeholder="Details..."></textarea>
-            <div id="error-desc" class="text-danger d-none" style="font-size: 11px; margin-top: 4px;">Description must be added.</div>
-          </div>
-          <div class="row g-2">
-            <div class="col-6">
-               <label class="text-xs fw-bold mb-1">Stage Amount (₹)</label>
-               <input id="swal-input3" type="number" class="form-control text-sm" placeholder="Max: ${remainingBudgetToAllocate}">
-               <div id="error-amount" class="text-danger d-none" style="font-size: 11px; margin-top: 4px;">Invalid amount.</div>
-            </div>
-            <div class="col-6">
-               <label class="text-xs fw-bold mb-1">Duration (Optional)</label>
-               <input id="swal-input4" type="datetime-local" class="form-control text-sm">
-            </div>
-          </div>
-        </div>`,
-      preConfirm: () => {
-        const name = document.getElementById('swal-input1').value.trim();
-        const desc = document.getElementById('swal-input2').value.trim();
-        const amt = Number(document.getElementById('swal-input3').value);
-        const duration = document.getElementById('swal-input4').value;
-        if (!name || !desc || !amt || amt > remainingBudgetToAllocate) {
-            Swal.showValidationMessage("Please check all required fields and budget limits");
-            return false;
-        }
-        return [name, desc, amt, duration || null];
-      }
-    });
-
-    if (formValues) {
-  const success = await addStageFunction(dispatch, { 
-    customer_id: customerId, 
-    stage_Name: formValues[0], 
-    description: formValues[1], 
-    amount: formValues[2],
-    duration: formValues[3] || null
-  }, id);
-
-  if (success) {
-    setIsDocumentUploaded(false);
-    // Refresh to get the real DB IDs for the new stage
-    individualStages(dispatch, id); 
+const addNewStage = async () => {
+  const totalAllocated = stagesList.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
+  const remainingBudgetToAllocate = Number(totals.cost) - totalAllocated;
+  
+  if (remainingBudgetToAllocate <= 0) {
+    Swal.fire("Full", "Total budget has already been allocated to stages.", "info");
+    return;
   }
-}
-  };
+
+  const { value: formValues } = await Swal.fire({
+    title: '<span style="font-size: 25px">Add New Stage</span>',
+    width: window.innerWidth < 500 ? '95%' : '450px',
+    html: `
+      <div class="text-start">
+        <p class="text-primary-600 fw-bold mb-10" style="font-size: 12px;">Available to Allocate: ${formatCurrency(remainingBudgetToAllocate)}</p>
+        
+        <div class="mb-3">
+          <label class="text-xs fw-bold mb-1">Stage Name *</label>
+          <input id="swal-input1" class="form-control text-sm" placeholder="e.g. Architecture Design ">
+          <div id="error-name" class="text-danger d-none" style="font-size: 11px; margin-top: 4px; font-weight: 500;">Stage name is required.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="text-xs fw-bold mb-1">Description *</label>
+          <textarea id="swal-input2" class="form-control text-sm" rows="2" placeholder="Details..."></textarea>
+          <div id="error-desc" class="text-danger d-none" style="font-size: 11px; margin-top: 4px; font-weight: 500;">Description must be added.</div>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-6">
+             <label class="text-xs fw-bold mb-1">Stage Amount (₹) *</label>
+             <input id="swal-input3" type="number" class="form-control text-sm" placeholder="Max: ${remainingBudgetToAllocate}">
+             <div id="error-amount" class="text-danger d-none" style="font-size: 11px; margin-top: 4px; font-weight: 500;">Invalid amount or exceeds budget.</div>
+          </div>
+          <div class="col-6">
+             <label class="text-xs fw-bold mb-1">Duration (Optional)</label>
+             <input id="swal-input4" type="datetime-local" class="form-control text-sm">
+          </div>
+        </div>
+      </div>`,
+    showCancelButton: true,
+    focusConfirm: false,
+    preConfirm: () => {
+      const name = document.getElementById('swal-input1').value.trim();
+      const desc = document.getElementById('swal-input2').value.trim();
+      const amt = Number(document.getElementById('swal-input3').value);
+      const duration = document.getElementById('swal-input4').value;
+
+      // Reset error visibility
+      document.getElementById('error-name').classList.add('d-none');
+      document.getElementById('error-desc').classList.add('d-none');
+      document.getElementById('error-amount').classList.add('d-none');
+
+      let hasError = false;
+
+      if (!name) {
+        document.getElementById('error-name').classList.remove('d-none');
+        hasError = true;
+      }
+      if (!desc) {
+        document.getElementById('error-desc').classList.remove('d-none');
+        hasError = true;
+      }
+      if (!amt || amt <= 0 || amt > remainingBudgetToAllocate) {
+        document.getElementById('error-amount').classList.remove('d-none');
+        hasError = true;
+      }
+
+      if (hasError) return false; // Keeps modal open
+
+      return [name, desc, amt, duration || null];
+    }
+  });
+
+  if (formValues) {
+    const success = await addStageFunction(dispatch, { 
+      customer_id: customerId, 
+      stage_Name: formValues[0], 
+      description: formValues[1], 
+      amount: formValues[2],
+      duration: formValues[3] || null
+    }, id);
+
+    if (success) {
+      setIsDocumentUploaded(false);
+      individualStages(dispatch, id); 
+    }
+  }
+};
 
 const recordPayment = async (stageId, stageAmount, stagePaid) => {
   const stageRemaining = Math.max(0, Number(stageAmount) - Number(stagePaid));
   
   const { value: formValues } = await Swal.fire({
-  title: '<span style="font-size: 25px">Record Payment</span>',
+    title: '<span style="font-size: 25px">Record Payment</span>',
     html: `
       <div style="text-align: left;">
-        <p style="font-size: 12px;">Balance: ${formatCurrency(stageRemaining)}</p>
-        <input id="swal-payment" type="number" class="form-control mb-3" value="${stageRemaining}">
+        <p style="font-size: 12px;" class="fw-bold text-secondary-light">Balance: ${formatCurrency(stageRemaining)}</p>
+        <div class="mb-3">
+            <label class="text-xs fw-bold mb-1">Amount to Pay</label>
+            <input id="swal-payment" type="number" class="form-control" value="${stageRemaining}">
+            <div id="error-payment" class="text-danger d-none" style="font-size: 11px; margin-top: 4px; font-weight: 500;">Please enter a valid amount within the balance.</div>
+        </div>
+        <label class="text-xs fw-bold mb-1">Payment Mode</label>
         <select id="swal-mode" class="form-select">
           <option value="online">Online</option>
           <option value="offline">Offline</option>
         </select>
       </div>`,
+    showCancelButton: true,
+    focusConfirm: false,
     preConfirm: () => {
       const paymentAmount = Number(document.getElementById('swal-payment').value);
-      if (!paymentAmount || paymentAmount <= 0 || paymentAmount > stageRemaining) 
-        return Swal.showValidationMessage('Invalid amount');
+      const paymentMode = document.getElementById('swal-mode').value;
       
-      return { 
-        paymentAmount, 
-        paymentMode: document.getElementById('swal-mode').value, 
-      };
+      document.getElementById('error-payment').classList.add('d-none');
+
+      if (!paymentAmount || paymentAmount <= 0 || paymentAmount > stageRemaining) {
+        document.getElementById('error-payment').classList.remove('d-none');
+        return false;
+      }
+      
+      return { paymentAmount, paymentMode };
     }
   });
 
- if (formValues) {
-        Swal.showLoading(); // Prevent double clicks
-        
-        const payload = { 
-            amount: formValues.paymentAmount, 
-            payment_mode: formValues.paymentMode, 
-            payment_date: new Date().toISOString(),
-            customerId: customerId,
-            budget: totals.cost,
-            customerName: currentProject?.customerName || "N/A",
-            projectName: currentProject?.projectName || "N/A",
-            payment_status: (formValues.paymentAmount >= stageRemaining) ? "Paid" : "Partially Paid",
-            stage_amount: stageAmount 
-        };
+  if (formValues) {
+    Swal.showLoading();
+    const payload = { 
+        amount: formValues.paymentAmount, 
+        payment_mode: formValues.paymentMode, 
+        payment_date: new Date().toISOString(),
+        customerId: customerId,
+        budget: totals.cost,
+        customerName: currentProject?.customerName || "N/A",
+        projectName: currentProject?.projectName || "N/A",
+        payment_status: (formValues.paymentAmount >= stageRemaining) ? "Paid" : "Partially Paid",
+        stage_amount: stageAmount 
+    };
 
-        // ONLY CALL THIS ONE FUNCTION
-        const success = await stagePaymentCollection(dispatch, payload, stageId, id);
+    const success = await stagePaymentCollection(dispatch, payload, stageId, id);
 
-        if (success) { 
-            setIsDocumentUploaded(false); 
-            setUploadedFile(null); 
-            
-            // Refresh the individual stages to get the updated "paid" amount from the DB
-            await individualStages(dispatch, id); 
-            await fetchAllStagesForStats(dispatch);
-            
-            Swal.fire("Success", "Payment recorded successfully", "success");
-        }
+    if (success) { 
+        setIsDocumentUploaded(false); 
+        setUploadedFile(null); 
+        await individualStages(dispatch, id); 
+        await fetchAllStagesForStats(dispatch);
+        Swal.fire("Success", "Payment recorded successfully", "success");
     }
+  }
 };
 
   const clearFileSelection = async (stageId) => {

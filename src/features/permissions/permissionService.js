@@ -33,7 +33,7 @@ export const savePermissionsFunction = async (rolePermissions) => {
         await api.post("/update-permissions", { permissions: rolePermissions });
         
         Swal.fire({
-            title: 'Success!',
+           title: '<span style="font-size: 25px">Success</span>',
             text: "User roles and permissions updated successfully.",
             icon: "success",
             confirmButtonColor: "#ea8b0c",

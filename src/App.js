@@ -14,6 +14,7 @@ import AddUserPage from "./pages/AddUserPage";
 import ErrorPage from "./pages/ErrorPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 import UsersListPage from "./pages/UsersListPage";
 import ReportPage from "./pages/ReportPage";
 import ProjectListPage from "./pages/ProjectListPage";
@@ -28,6 +29,7 @@ import PermissionPage from "./pages/PermissionPage";
 import NotificationAlertPage from "./pages/NotificationAlertPage";
 // Services
 import { loadUserFunction } from "./features/auth/authService";
+import AccessDeniedLayer from "./components/AccessDeniedLayer";
 
 function App() {
   const dispatch = useDispatch();
@@ -41,6 +43,8 @@ function App() {
     }
   }, [dispatch]);
 
+  
+
   return (
     <BrowserRouter basename="infinus">
       <Toaster position="top-center" reverseOrder={false} />
@@ -48,25 +52,26 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path='/sign-in' element={<SignInPage />} />
+        <Route path='/sign-up' element={<SignUpPage />} />
         <Route path='/forgot-password' element={<ForgotPasswordPage />} />
-
+        <Route path = "/access-denied" element = {<AccessDeniedLayer/>}/>
         {/* Protected Routes */}
         <Route element={<ProtectedLayout />}>
         <Route path='*' element={<ErrorPage />} />
-          <Route path='/' element={<HasPermission permission={["view-admin", "view-dashboard"]}><HomePageOne /></HasPermission>} />
-          <Route path='/projects-list' element={<HasPermission permission="view-projects"><ProjectListPage /></HasPermission>} />
-          <Route path='/add-projects' element={<HasPermission permission="create-projects"><AddProjectPage /></HasPermission>} />
-          <Route path='/edit-project/:id' element={<HasPermission permission="edit-projects"><EditProjectPage /></HasPermission>} />
-          <Route path='/projects/:id' element={<HasPermission permission="view-projects"><SingleProjectPage /></HasPermission>} />
-          <Route path='/customers-list' element={<HasPermission permission="view-customers"><UsersListPage /></HasPermission>} />
-          <Route path='/add-customer' element={<HasPermission permission="create-customer"><AddUserPage /></HasPermission>} />
-          <Route path='/edit-customer/:id' element={<HasPermission permission="edit-customer"><EditUserPageList /></HasPermission>} />
-          <Route path='/staff-list' element={<HasPermission permission="view-staffs"><StaffListPage /></HasPermission>} />
-          <Route path='/add-staff' element={<HasPermission permission="create-staff"><AddStaffPage /></HasPermission>} />
-          <Route path='/edit-staff/:id' element={<HasPermission permission="edit-staff"><EditStaffListPage /></HasPermission>} />
-          <Route path='/role-access' element={<HasPermission permission="manage-access"><PermissionPage /></HasPermission>} />
-          <Route path='/remainders' element={<HasPermission permission="manage-remainders"><NotificationAlertPage /></HasPermission>} />
-          <Route path='/reports' element={<HasPermission permission="view-reports"><ReportPage /></HasPermission>} />
+          <Route path='/' element={<HasPermission permission={["view-admin", "view-dashboard"]} redirect={true}><HomePageOne /></HasPermission > } />
+          <Route path='/projects-list' element={<HasPermission permission="view-projects" redirect={true}><ProjectListPage /></HasPermission>} />
+          <Route path='/add-projects' element={<HasPermission permission="create-projects" redirect={true}><AddProjectPage /></HasPermission>} />
+          <Route path='/edit-project/:id' element={<HasPermission permission="edit-projects" redirect={true}><EditProjectPage /></HasPermission>} />
+          <Route path='/projects/:id' element={<HasPermission permission="view-projects" redirect={true}><SingleProjectPage /></HasPermission>} />
+          <Route path='/customers-list' element={<HasPermission permission="view-customers" redirect={true}><UsersListPage /></HasPermission>} />
+          <Route path='/add-customer' element={<HasPermission permission="create-customer" redirect={true}><AddUserPage /></HasPermission>} />
+          <Route path='/edit-customer/:id' element={<HasPermission permission="edit-customer" redirect={true}><EditUserPageList /></HasPermission>} />
+          <Route path='/staff-list' element={<HasPermission permission="view-staffs" redirect={true}><StaffListPage /></HasPermission>} />
+          <Route path='/add-staff' element={<HasPermission permission="create-staff" redirect={true}><AddStaffPage /></HasPermission>} />
+          <Route path='/edit-staff/:id' element={<HasPermission permission="edit-staff" redirect={true}><EditStaffListPage /></HasPermission>} />
+          <Route path='/role-access' element={<HasPermission permission="manage-permissions" redirect={true}><PermissionPage /></HasPermission>} />
+          <Route path='/remainders' element={<HasPermission permission="manage-remainders" redirect={true}><NotificationAlertPage /></HasPermission>} />
+          <Route path='/reports' element={<HasPermission permission="view-reports" redirect={true}><ReportPage /></HasPermission>} />
         </Route>
       </Routes>
     </BrowserRouter>

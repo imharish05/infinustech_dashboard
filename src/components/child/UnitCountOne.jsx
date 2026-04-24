@@ -23,7 +23,7 @@ const UnitCountOne = () => {
     // The project stores 'assignedStaffId' (e.g., 12), not the 'userId' (e.g., 30).
     const currentStaffMember = useMemo(() => {
         if (isAdmin) return null;
-        return staffs.find(s => Number(s.userId) === Number(user?.id));
+        return staffs.find(s => String(s.userId) === String(user?.id));
     }, [staffs, user, isAdmin]);
 
     const myStaffId = currentStaffMember?.id; // This would be 12 in your example
@@ -34,7 +34,7 @@ const UnitCountOne = () => {
         if (!myStaffId) return []; // If staff record not found yet, return empty
         
         return projects.filter(project => 
-            Number(project.assignedStaffId) === Number(myStaffId)
+            String(project.assignedStaffId) === String(myStaffId)
         );
     }, [projects, myStaffId, isAdmin]);
 
@@ -44,6 +44,7 @@ const UnitCountOne = () => {
         
         // Count unique customers from the projects assigned to me
         const customerIds = new Set(filteredProjects.map(p => String(p.customerId)));
+
         return customerIds.size;
     }, [customers, filteredProjects, isAdmin]);
 
@@ -90,7 +91,7 @@ const UnitCountOne = () => {
                 bgClass="bg-gradient-start-4" 
             />
 
-            {(isAdmin || user?.permissions?.includes('manage-payment')) && (
+            {(isAdmin || user?.permissions?.includes('view-admin')) && (
                 <>
                     <StatCard 
                         title="Total Fees" 

@@ -1,130 +1,175 @@
-import { Icon } from "@iconify/react/dist/iconify.js";
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Icon } from "@iconify/react";
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
+import { signupFunction } from "../features/auth/authService";
 
 const SignUpLayer = () => {
-  return (
-    <section className='auth bg-base d-flex flex-wrap'>
-      <div className='auth-left d-lg-block d-none'>
-        <div className='d-flex align-items-center flex-column h-100 justify-content-center'>
-          <img src='assets/images/auth/auth-img.png' alt='' />
-        </div>
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    password: "",
+  });
+
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { loading } = useSelector((state) => state.auth);
+
+  const toggleVisibility = () => setShowPassword(!showPassword);
+
+  const validate = () => {
+    let newErrors = {};
+    if (!formData.name.trim()) newErrors.name = "Full Name is required";
+    if (!formData.email.trim()) {
+        newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+        newErrors.email = "Email is invalid";
+    }
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else if (formData.phone.length < 10) {
+      newErrors.phone = "Phone number must be 10 digits";
+    }
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Minimum 6 characters required";
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    if (name === "phone") {
+      if (/^\d*$/.test(value) && value.length <= 10) {
+        setFormData({ ...formData, [name]: value });
+      }
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
+  };
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
+    
+    // Using the signupFunction we created earlier
+    signupFunction(dispatch, navigate, { ...formData, role: 'staff' });
+  };
+
+  const ErrorMsg = ({ field }) => {
+    return errors[field] ? (
+      <div className="text-danger mt-1 fw-medium" style={{ fontSize: "11px" }}>
+        {errors[field]}
       </div>
-      <div className='auth-right py-32 px-24 d-flex flex-column justify-content-center'>
-        <div className='max-w-464-px mx-auto w-100'>
-          <div>
-            <Link to='/' className='mb-40 max-w-290-px'>
-              <img src='assets/images/logo.png' alt='' />
+    ) : null;
+  };
+
+  return (
+    <section className="auth bg-base d-flex align-items-center justify-content-center flex-wrap">
+      <div className="py-32 px-24 d-flex flex-column justify-content-center">
+        <div className="max-w-464-px mx-auto w-100">
+          <div className="d-flex flex-column align-items-center justify-content-around">
+            <Link to="/" className="mb-40 max-w-290-px">
+              <img src="/assets/images/logo.png" alt="Logo" />
             </Link>
-            <h4 className='mb-12'>Sign Up to your Account</h4>
-            <p className='mb-32 text-secondary-light text-lg'>
-              Welcome back! please enter your detail
+            <h4 className="mb-12">Create your Account</h4>
+            <p className="mb-32 text-secondary-light text-lg text-center">
+              Join the platform! please enter your details
             </p>
           </div>
-          <form action='#'>
-            <div className='icon-field mb-16'>
-              <span className='icon top-50 translate-middle-y'>
-                <Icon icon='f7:person' />
+
+          <form onSubmit={handleSignUp}>
+            {/* Full Name */}
+            <div className="icon-field mb-16">
+              <span className="icon top-50 translate-middle-y">
+                <Icon icon="solar:user-linear" />
               </span>
               <input
-                type='text'
-                className='form-control h-56-px bg-neutral-50 radius-12'
-                placeholder='Username'
+                name="name"
+                type="text"
+                value={formData.name}
+                onChange={handleInputChange}
+                className="form-control h-56-px bg-neutral-50 radius-12"
+                placeholder="Full Name"
               />
+              <ErrorMsg field="name" />
             </div>
-            <div className='icon-field mb-16'>
-              <span className='icon top-50 translate-middle-y'>
-                <Icon icon='mage:email' />
+
+            {/* Email */}
+            <div className="icon-field mb-16">
+              <span className="icon top-50 translate-middle-y">
+                <Icon icon="mage:email" />
               </span>
               <input
-                type='email'
-                className='form-control h-56-px bg-neutral-50 radius-12'
-                placeholder='Email'
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleInputChange}
+                className="form-control h-56-px bg-neutral-50 radius-12"
+                placeholder="Email Address"
               />
+              <ErrorMsg field="email" />
             </div>
-            <div className='mb-20'>
-              <div className='position-relative '>
-                <div className='icon-field'>
-                  <span className='icon top-50 translate-middle-y'>
-                    <Icon icon='solar:lock-password-outline' />
-                  </span>
-                  <input
-                    type='password'
-                    className='form-control h-56-px bg-neutral-50 radius-12'
-                    id='your-password'
-                    placeholder='Password'
-                  />
-                </div>
-                <span
-                  className='toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light'
-                  data-toggle='#your-password'
+
+            {/* Phone */}
+            <div className="icon-field mb-16">
+              <span className="icon top-50 translate-middle-y">
+                <Icon icon="mage:phone" />
+              </span>
+              <input
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleInputChange}
+                className="form-control h-56-px bg-neutral-50 radius-12"
+                placeholder="Phone Number"
+              />
+              <ErrorMsg field="phone" />
+            </div>
+
+            {/* Password */}
+            <div className="position-relative mb-20">
+              <div className="icon-field">
+                <span className="icon top-50 translate-middle-y">
+                  <Icon icon="solar:lock-password-outline" />
+                </span>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="form-control h-56-px bg-neutral-50 radius-12"
+                  placeholder="Password"
                 />
               </div>
-              <span className='mt-12 text-sm text-secondary-light'>
-                Your password must have at least 8 characters
-              </span>
+              <span
+                onClick={toggleVisibility}
+                className={`toggle-password cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light ${
+                  showPassword ? "ri-eye-off-line" : "ri-eye-line"
+                }`}
+              />
+              <ErrorMsg field="password" />
             </div>
-            <div className=''>
-              <div className='d-flex justify-content-between gap-2'>
-                <div className='form-check style-check d-flex align-items-start'>
-                  <input
-                    className='form-check-input border border-neutral-300 mt-4'
-                    type='checkbox'
-                    defaultValue=''
-                    id='condition'
-                  />
-                  <label
-                    className='form-check-label text-sm'
-                    htmlFor='condition'
-                  >
-                    By creating an account means you agree to the
-                    <Link to='#' className='text-primary-600 fw-semibold'>
-                      Terms &amp; Conditions
-                    </Link>{" "}
-                    and our
-                    <Link to='#' className='text-primary-600 fw-semibold'>
-                      Privacy Policy
-                    </Link>
-                  </label>
-                </div>
-              </div>
-            </div>
+
             <button
-              type='submit'
-              className='btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32'
+              type="submit"
+              disabled={loading}
+              className="btn btn-primary text-sm btn-sm px-12 py-16 w-100 radius-12 mt-32"
             >
-              {" "}
-              Sign Up
+              {loading ? "Processing..." : "Sign Up"}
             </button>
-            <div className='mt-32 center-border-horizontal text-center'>
-              <span className='bg-base z-1 px-4'>Or sign up with</span>
-            </div>
-            <div className='mt-32 d-flex align-items-center gap-3'>
-              <button
-                type='button'
-                className='fw-semibold text-primary-light py-16 px-24 w-50 border radius-12 text-md d-flex align-items-center justify-content-center gap-12 line-height-1 bg-hover-primary-50'
-              >
-                <Icon
-                  icon='ic:baseline-facebook'
-                  className='text-primary-600 text-xl line-height-1'
-                />
-                Google
-              </button>
-              <button
-                type='button'
-                className='fw-semibold text-primary-light py-16 px-24 w-50 border radius-12 text-md d-flex align-items-center justify-content-center gap-12 line-height-1 bg-hover-primary-50'
-              >
-                <Icon
-                  icon='logos:google-icon'
-                  className='text-primary-600 text-xl line-height-1'
-                />
-                Google
-              </button>
-            </div>
-            <div className='mt-32 text-center text-sm'>
-              <p className='mb-0'>
+            
+            <div className="mt-32 text-center">
+              <p className="text-sm text-secondary-light">
                 Already have an account?{" "}
-                <Link to='/sign-in' className='text-primary-600 fw-semibold'>
+                <Link to="/signin" className="text-primary-600 fw-semibold">
                   Sign In
                 </Link>
               </p>
