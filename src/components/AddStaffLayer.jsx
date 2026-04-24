@@ -27,14 +27,24 @@ const AddStaffLayer = () => {
 
 const handlePhoneChange = (e) => {
     const value = e.target.value;
-
-    if(/^\d*$/.test(value) && value.length<=10){
-      setPhone(value)
+    // Only allow digits and max 10 characters
+    if (/^\d*$/.test(value) && value.length <= 10) {
+        setPhone(value);
+        
+        // Optional: Clear error as they type once they hit 10
+        if (value.length === 10) {
+            setErrors(prev => {
+                const { phone: _, ...rest } = prev;
+                return rest;
+            });
+        }
     }
-
-  }
+};
 
     const handleCancel = () => navigate(-1);
+
+
+
 
 const validate = () => {
     let newErrors = {};
@@ -49,8 +59,12 @@ const validate = () => {
     } else if (password.length < 6) {
         newErrors.password = "Password must be at least 6 characters";
     }
-    if (!phone.trim()) newErrors.phone = "Phone number is required";
-    
+
+if (!phone.trim()) {
+        newErrors.phone = "Phone number is required";
+    } else if (phone.length !== 10) {
+        newErrors.phone = "Phone number must be 10 digits";
+    }
     // Add Role validation
     if (!role) newErrors.role = "Please select a user role"; 
     

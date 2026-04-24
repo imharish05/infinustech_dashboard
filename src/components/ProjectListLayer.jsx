@@ -46,7 +46,7 @@ const ProjectListLayer = () => {
   };
 
   const getStaffName = (staffId) => {
-    const staff = staffList.find((s) => s.id == staffId);
+    const staff = staffList.find((s) => String(s.id) === String(staffId));
     return staff ? staff.name : "Unassigned";
   };
 
@@ -103,7 +103,7 @@ const ProjectListLayer = () => {
   const handleDelete = (id) => {
     Swal.fire({
       title: '<span style="font-size: 25px">Are You sure ?</span>',
-      text: "You won't be able to revert this!",
+      text: "Deleting this project will permanently remove all related reports, payments, stages, and uploads. This action is irreversible.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#ea8b0c",

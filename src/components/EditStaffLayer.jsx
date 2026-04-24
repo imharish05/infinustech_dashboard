@@ -40,10 +40,22 @@ const EditStaffLayer = () => {
             setPassword(staffMember.plainPassword || ""); 
             setRole(staffMember.role || ""); 
             setStatus(staffMember.status || "Active");
-            // SAFE METHOD: Ensure we always set an array
             setSelectedProjectIds(Array.isArray(staffMember.projects) ? staffMember.projects : []);
         }
     }, [staffMember]);
+
+    // Handlers
+    const handlePhoneChange = (e) => {
+        const value = e.target.value;
+        // Accept only digits and limit to 10 characters
+        if (/^\d*$/.test(value) && value.length <= 10) {
+            setPhone(value);
+            // Clear phone error immediately if it becomes valid
+            if (value.length === 10 && errors.phone) {
+                setErrors(prev => ({ ...prev, phone: null }));
+            }
+        }
+    };
 
     const validate = () => {
         let newErrors = {};
@@ -60,6 +72,12 @@ const EditStaffLayer = () => {
         }
         if (!role) newErrors.role = "Please select a user role";
 
+        if (!phone.trim()) {
+            newErrors.phone = "Phone number is required";
+        } else if (phone.length !== 10) {
+            newErrors.phone = "Phone number must be 10 digits";
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -72,7 +90,6 @@ const EditStaffLayer = () => {
         ) : null
     );
 
-    // SAFE METHOD: Added checks to prevent filter/includes crashes
     const filteredProjects = projectList.filter(proj => {
         const matchesSearch = (proj?.projectName || "").toLowerCase().includes(searchTerm.toLowerCase());
         const safeSelectedIds = Array.isArray(selectedProjectIds) ? selectedProjectIds : [];
@@ -84,7 +101,6 @@ const EditStaffLayer = () => {
         e.preventDefault();
         if (!validate()) return;
 
-        // SAFE METHOD: Normalize arrays before logic
         const currentSelections = Array.isArray(selectedProjectIds) ? selectedProjectIds : [];
         const originalProjects = Array.isArray(staffMember?.projects) ? staffMember.projects : [];
 
@@ -100,11 +116,11 @@ const EditStaffLayer = () => {
             projects: currentSelections 
         };
 
-        // SAFE METHOD: filter works because we normalized to arrays above
         const addedProjects = currentSelections.filter(pid => !originalProjects.includes(pid));
         const removedProjects = originalProjects.filter(pid => !currentSelections.includes(pid));
 
         const success = await updateStaffFunction(dispatch, id, payload);
+        if (success) navigate("/staff-list");
     };
 
     return (
@@ -192,16 +208,21 @@ const EditStaffLayer = () => {
 
                                     <div className="row">
                                         <div className="col-md-6 mb-20">
-                                            <label className="form-label fw-semibold text-primary-light text-sm mb-8">Phone Number</label>
-                                            <input type="text" className="form-control radius-8" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                            <label className="form-label fw-semibold text-primary-light text-sm mb-8">Phone Number *</label>
+                                            <input 
+                                                type="tel" 
+                                                className={`form-control radius-8 ${errors.phone ? 'border-danger' : ''}`} 
+                                                value={phone} 
+                                                onChange={handlePhoneChange} 
+                                                placeholder="10 digit number"
+                                            />
+                                            <ErrorMsg field="phone" />
                                         </div>
                                         <div className="col-md-6 mb-20">
                                             <label className="form-label fw-semibold text-primary-light text-sm mb-8">Location</label>
                                             <input type="text" className="form-control radius-8" value={location} onChange={(e) => setLocation(e.target.value)} />
                                         </div>
                                     </div>
-
-                                    {/* Project Selection logic goes here using filteredProjects */}
 
                                     <div className="d-flex align-items-center justify-content-center gap-3 mt-32">
                                         <button type='button' onClick={() => navigate(-1)} className="btn border-danger text-danger px-40">Cancel</button>

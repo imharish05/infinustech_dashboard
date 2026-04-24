@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Icon } from "@iconify/react";
 import Swal from "sweetalert2";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom"; // Added Link for the safety UI
 import { 
   addStageFunction, 
   deleteStageDocumentFunction, 
@@ -34,9 +34,6 @@ const SingleProjectLayer = () => {
   const projectList = useSelector((state) => state.projects.projects) || [];
   const stages = useSelector((state) => state.stages.stage) || [];
 
-  console.log(stages);
-  
-
   const [customerId, setCustomerId] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
   const [isDocumentUploaded, setIsDocumentUploaded] = useState(false);
@@ -46,8 +43,6 @@ const SingleProjectLayer = () => {
     return projectList.find((proj) => (proj.id || proj._id) === id);
   }, [projectList, id]);
 
-  console.log(currentProject);
-  
 
   useEffect(() => {
     if (currentProject?.customerId) {
@@ -264,10 +259,11 @@ const addNewStage = async () => {
   if (formValues) {
     const success = await addStageFunction(dispatch, { 
       customer_id: customerId, 
-      stage_Name: formValues[0], 
+      stage_Name: formValues[0],
+      payment_status:"Pending",
       description: formValues[1], 
       amount: formValues[2],
-      duration: formValues[3] || null
+      duration: formValues[3]
     }, id);
 
     if (success) {
@@ -401,6 +397,7 @@ const openPreviewModal = (stage) => {
         showConfirmButton: false 
     });
 };
+
 const updateStatus = async (stageId, currentStatus) => {
   const { value: newStatus } = await Swal.fire({
     title: '<span style="font-size: 25px">Update Status</span>',
@@ -431,8 +428,35 @@ const updateStatus = async (stageId, currentStatus) => {
 
   if (newStatus && newStatus !== currentStatus) {
     await updateStageStatusFunction(dispatch, { status: newStatus }, stageId, id);
+    await fetchAllStagesForStats(dispatch);
   }
 };
+
+  // --- PRECAUTIONARY CHECK IF PROJECT NOT FOUND ---
+// --- PRECAUTIONARY CHECK IF PROJECT NOT FOUND ---
+  if (!currentProject && projectList.length > 0) {
+    return (
+      <div className="d-flex align-items-center justify-content-center flex-grow-1 w-100" style={{ minHeight: '70vh' }}>
+        <div className="text-center p-48 bg-base radius-12 shadow-sm border w-100 max-w-600">
+          <div className="d-flex justify-content-center mb-24">
+            <div className="bg-danger-50 rounded-circle d-flex align-items-center justify-content-center" style={{ width: '120px', height: '120px' }}>
+              <Icon icon="solar:shield-warning-bold-duotone" className="text-danger-main" width="80" />
+            </div>
+          </div>
+          <h3 className="text-primary-900 mb-12 fw-bold">Project Unavailable</h3>
+          <p className="text-secondary-light text-lg mb-32 mx-auto" style={{ maxWidth: '400px' }}>
+            We couldn't find the project details. It may have been moved, deleted.
+          </p>
+          <div className="d-flex justify-content-center">
+            <Link to="/projects-list" className="btn btn-primary-600 btn-lg d-flex align-items-center gap-3 px-32 radius-8">
+              <Icon icon="lucide:arrow-left" width="20" /> 
+              <span>Return to Project Dashboard</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-12 p-md-24 bg-base radius-12 shadow-sm border">
@@ -493,7 +517,7 @@ const updateStatus = async (stageId, currentStatus) => {
                         }`} style={{width: "max-content"}}>
                           <span className="text-xxs fw-bold text-uppercase">{stage.status || 'Initialized'}</span>
                         </div>
-                        <HasPermission permission={"upload-docs"}>
+                        <HasPermission permission={"change-status"}>
                           {index === activeStageIndex && !isReadOnly && (
                             <button onClick={() => updateStatus(stage.id, stage.status || 'Initialized')} className="btn p-0 border-0 text-primary-light">
                               <Icon icon="lucide:edit-3" width="14" />

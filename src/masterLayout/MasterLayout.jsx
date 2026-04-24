@@ -536,10 +536,10 @@ const MasterLayout = () => {
                   <div className="dropdown-menu to-top dropdown-menu-sm">
                     <div className="py-12 px-16 radius-8 bg-primary-50 mb-16 d-flex align-items-center justify-content-between gap-2">
                       <div>
-                        <h6 className="text-lg text-primary-light fw-semibold mb-2">
+                        <h6 className="text-lg text-primary-light fw-semibold mb-2 text-capitalize">
                           {user?.name}
                         </h6>
-                        <span className="text-secondary-light fw-medium text-sm">
+                        <span className="text-secondary-light fw-medium text-sm text-capitalize">
                           {user?.role}
                         </span>
                       </div>
