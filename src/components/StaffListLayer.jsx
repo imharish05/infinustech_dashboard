@@ -238,11 +238,11 @@ const getProjectDetails = (projectData) => {
         }}
       >
         <div className="d-flex flex-column">
-          <h6 className="text-sm fw-bold mb-0 transition-all" style={{ color: '#0A1A33' }}>
+          <h6 className="text-sm fw-bold mb-0 transition-all text-capitalize" style={{ color: '#0A1A33' }}>
             {p.projectName}
           </h6>
           {p.location && (
-            <span className="text-xs transition-all" style={{ color: 'rgba(10,26,51,0.6)' }}>
+            <span className="text-xs transition-all text-capitalize" style={{ color: 'rgba(10,26,51,0.6)' }}>
               {p.location}
             </span>
           )}

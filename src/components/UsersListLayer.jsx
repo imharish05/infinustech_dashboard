@@ -171,7 +171,7 @@ const UsersListLayer = () => {
                     <td className="text-secondary-light">{item.phone}</td>
                     <td className="text-capitalize text-secondary-light text-truncate" style={{maxWidth: '250px'}}>{item.address}</td>
                     <td>
-                      <span className={`${getStatusClass(item.status)} px-12 py-4 radius-4 fw-medium text-xs`}>
+                      <span className={`${getStatusClass(item.status)} px-12 py-4 radius-4 fw-medium text-xs text-capitalize`}>
                         {item.status}
                       </span>
                     </td>
