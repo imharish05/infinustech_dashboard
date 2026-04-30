@@ -22,11 +22,12 @@ const SingleProjectLayer = () => {
   const dispatch = useDispatch();
   const { id } = useParams();
 
-  useEffect(() => {
-    if (id) {
-      individualStages(dispatch, id);
-    }
-  }, [id, dispatch]);
+useEffect(() => {
+  if (id) {
+         individualStages(dispatch, id);
+      fetchAllStagesForStats(dispatch);
+  }
+}, [id, dispatch]);
 
   const [searchParams] = useSearchParams();
   const isReadOnly = searchParams.get("mode") === "view";
@@ -205,7 +206,7 @@ const SingleProjectLayer = () => {
       if (success) {
         // ✅ Reset all stage upload states on new stage add
         setIsDocumentUploaded({});
-        individualStages(dispatch, id);
+        await individualStages(dispatch, id);
       }
     }
   };
@@ -242,6 +243,7 @@ const SingleProjectLayer = () => {
     if (newStatus && newStatus !== currentStatus) {
       await updateStageStatusFunction(dispatch, { status: newStatus }, stageId, id);
       await fetchAllStagesForStats(dispatch);
+      await individualStages(dispatch, id);
       return true;
     }
     return false;
@@ -483,16 +485,25 @@ const SingleProjectLayer = () => {
     <div className="p-12 p-md-24 bg-base radius-12 shadow-sm border">
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-24">
         <div>
-          <h5 className="mb-4 text-primary-900">{currentProject?.projectName || "Project Progress"}</h5>
+          <h5 className="mb-4 text-primary-900 text-capitalize">{currentProject?.projectName || "Project Progress"}</h5>
           <p className="text-secondary-light text-sm mb-0">Project tracking for {currentProject?.projectName}</p>
         </div>
-        <HasPermission permission={"manage-payment"}>
-          {!isReadOnly && (
-            <button onClick={addNewStage} className="btn btn-primary-600 btn-sm d-flex align-items-center gap-2 radius-8">
-              <Icon icon="ic:baseline-plus" /> Add Stage
-            </button>
-          )}
-        </HasPermission>
+  <div className="d-flex align-items-center gap-2">
+  <HasPermission permission={"manage-payment"}>
+    {!isReadOnly && (
+      <button onClick={addNewStage} className="btn btn-primary-600 btn-sm d-flex align-items-center gap-2 radius-8">
+        <Icon icon="ic:baseline-plus" /> Add Stage
+      </button>
+    )}
+  </HasPermission>
+    <button
+    onClick={() => { individualStages(dispatch, id); fetchAllStagesForStats(dispatch); }}
+    className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 radius-8"
+    title="Refresh"
+  >
+    <Icon icon="lucide:refresh-cw" width="15" />
+  </button>
+</div>
       </div>
 
       <div className="row row-cols-1 row-cols-sm-2 row-cols-xl-4 gy-4 mb-32">
@@ -544,12 +555,17 @@ const SingleProjectLayer = () => {
                           <span className="text-xxs fw-bold text-uppercase">{stage.status || 'Initialized'}</span>
                         </div>
                         <HasPermission permission={"change-status"}>
-                          {index === activeStageIndex && !isReadOnly && (
-                            <button onClick={() => updateStatus(stage.id, stage.status || 'Initialized')} className="btn p-0 border-0 text-primary-light">
-                              <Icon icon="lucide:edit-3" width="14" />
-                            </button>
-                          )}
-                        </HasPermission>
+  {!isReadOnly && (
+    <button
+      onClick={() => !isCompleted && updateStatus(stage.id, stage.status || 'Initialized')}
+      className={`btn p-0 border-0 ${isCompleted ? 'text-neutral-300' : 'text-primary-light'}`}
+      disabled={isCompleted}
+      title={isCompleted ? "Stage completed" : "Edit status"}
+    >
+      <Icon icon="lucide:edit-3" width="14" />
+    </button>
+  )}
+</HasPermission>
                       </div>
                       <p className="text-secondary-light text-sm mb-12">{stage.description}</p>
                       {stage.duration && <p className="text-secondary-light text-sm mb-12">Due : {formatDate(stage.duration)}</p>}

@@ -205,7 +205,8 @@ const MasterLayout = () => {
   const isProjectRoute =
     location.pathname.startsWith("/projects-list") ||
     location.pathname.startsWith("/add-projects") ||
-    location.pathname.startsWith("/projects/");
+    location.pathname.startsWith("/projects/") ||
+    location.pathname.startsWith("/edit-project");
 
   // ─────────────────────────────────────────────────────────────
   // Helper: resolve the project name for a notification item.

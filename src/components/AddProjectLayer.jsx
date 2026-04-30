@@ -1,10 +1,11 @@
 import { Icon } from '@iconify/react/dist/iconify.js';
 import React, { useId, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {useDispatch, useSelector} from "react-redux"
 import { addNewProject } from '../features/projects/projectService';
 import Swal from 'sweetalert2';
 const AddProjectLayer = () => {
+
 
     
     // Hooks
@@ -229,7 +230,18 @@ const validate = () => {
                     </li>
                 ))
             ) : (
-                <li className="p-10 text-center text-gray-400">No customers found</li>
+                <>
+                    <li className="p-10 text-center text-gray-400">No customers found</li>
+                    <li 
+    className="p-10 text-center text-primary-400 cursor-pointer"
+    onMouseDown={(e) => {
+        e.preventDefault(); // Prevents onBlur from firing
+        navigate("/add-customer");
+    }}
+>
+    + Add New Customer
+</li>
+                </>
             )}
         </ul>
     )}
@@ -316,7 +328,18 @@ const validate = () => {
                     </li>
                 ))
             ) : (
+                <>
                 <li className="p-10 text-center text-gray-400">No staff found</li>
+                                    <li 
+    className="p-10 text-center text-primary-400 cursor-pointer"
+    onMouseDown={(e) => {
+        e.preventDefault(); // Prevents onBlur from firing
+        navigate("/add-staff");
+    }}
+>
+    + Add Staff
+</li>
+    </>
             )}
         </ul>
     )}
@@ -410,17 +433,17 @@ const validate = () => {
 
                                         <div className="d-flex align-items-center justify-content-center gap-3">
                                             <button
+                                                type="submit"
+                                                className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"
+                                            >
+                                                Save Project
+                                            </button>
+                                            <button
                                             type='button'
                                                 onClick={()=>handleCancel()}
                                                 className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8"
                                             >
                                                 Cancel
-                                            </button>
-                                            <button
-                                                type="submit"
-                                                className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"
-                                            >
-                                                Save
                                             </button>
                                         </div>
                                     </form>

@@ -234,8 +234,8 @@ const EditStaffLayer = () => {
                                     </div>
 
                                     <div className="d-flex align-items-center justify-content-center gap-3 mt-32">
+                                        <button type="submit" className="btn btn-primary px-40 btn-primary">Save Details</button>
                                         <button type='button' onClick={() => navigate(-1)} className="btn border-danger text-danger px-40">Cancel</button>
-                                        <button type="submit" className="btn btn-primary px-40" style={{ backgroundColor: '#EA8B0C', border: 'none' }}>Save Details</button>
                                     </div>
                                 </form>
                             </div>

@@ -224,8 +224,8 @@ if (!phone.trim()) {
 
                                     
                                     <div className="d-flex align-items-center justify-content-center gap-3 mt-32">
+                                        <button type="submit" className="btn btn-primary text-md px-56 py-12 radius-8 btn-primary">Save Staff</button>
                                         <button type='button' onClick={handleCancel} className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8">Cancel</button>
-                                        <button type="submit" className="btn btn-primary text-md px-56 py-12 radius-8" style={{ backgroundColor: '#EA8B0C', borderColor: '#EA8B0C' }}>Save Staff</button>
                                     </div>
                                 </form>
                             </div>

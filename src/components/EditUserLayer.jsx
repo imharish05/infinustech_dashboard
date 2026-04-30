@@ -171,6 +171,15 @@ const EditUserLayer = () => {
 
                                     {/* Action Buttons */}
                                     <div className="d-flex align-items-center justify-content-center gap-3">
+
+                                        <HasPermission permission={"edit-customer"}>
+                                            <button
+                                                type="submit"
+                                                className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"
+                                            >
+                                                Save Details
+                                            </button>
+                                        </HasPermission>
                                         <button
                                             type='button'
                                             onClick={handleCancel}
@@ -178,15 +187,6 @@ const EditUserLayer = () => {
                                         >
                                             Cancel
                                         </button>
-
-                                        <HasPermission permission={"edit-customer"}>
-                                            <button
-                                                type="submit"
-                                                className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"
-                                            >
-                                                Save Changes
-                                            </button>
-                                        </HasPermission>
                                     </div>
                                 </form>
                             </div>

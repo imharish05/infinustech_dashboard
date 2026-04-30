@@ -160,13 +160,6 @@ const AddUserLayer = () => {
                                         </div>
     
                                         <div className="d-flex align-items-center justify-content-center gap-3">
-                                            <button
-                                            type='button'
-                                                onClick={()=>handleCancel()}
-                                                className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8"
-                                            >
-                                                Cancel
-                                            </button>
                                             
 
                                 <HasPermission permission={"edit-customer"}>
@@ -174,9 +167,16 @@ const AddUserLayer = () => {
                                                 type="submit"
                                                 className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8"
                                                 >
-                                                Save
+                                                Save Customer
                                             </button>
                                             </HasPermission>
+                                            <button
+                                            type='button'
+                                                onClick={()=>handleCancel()}
+                                                className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8"
+                                            >
+                                                Cancel
+                                            </button>
                                         </div>
                                     </form>
                                 </div>

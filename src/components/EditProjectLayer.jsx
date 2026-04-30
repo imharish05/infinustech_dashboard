@@ -309,8 +309,8 @@ const EditProjectLayer = () => {
                                     </div>
 
                                     <div className="d-flex align-items-center justify-content-center gap-3">
+                                        <button type="submit" className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">Save Details</button>
                                         <button type='button' onClick={() => navigate(-1)} className="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8">Cancel</button>
-                                        <button type="submit" className="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">Save Changes</button>
                                     </div>
                                 </form>
                             </div>
