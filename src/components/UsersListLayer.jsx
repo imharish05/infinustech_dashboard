@@ -84,7 +84,7 @@ const UsersListLayer = () => {
 
   const handleDelete = (id) => {
     Swal.fire({
-      title: '<span style="font-size: 25px text-primary-900">Are you sure?</span>',
+      title: '<span style="font-size:25px">Are you sure?</span>',
       text: "You won't be able to revert this! Deleting this customer will clear all associated reports, payments, stages, and document uploads.",
       icon: "warning",
       showCancelButton: true,

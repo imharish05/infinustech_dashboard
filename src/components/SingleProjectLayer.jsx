@@ -16,8 +16,7 @@ import { stagePaymentCollection } from "../features/payment/paymentService";
 import HasPermission from "./HasPermission";
 import api from "../api/axios";
 import toast from "react-hot-toast";
-
-import DocumentUploadModal from "./DocumentUploadModal"
+import DocumentUploadModal from "./DocumentUploadModal";
 
 const SingleProjectLayer = () => {
   const dispatch = useDispatch();
@@ -36,8 +35,10 @@ const SingleProjectLayer = () => {
 
   const [customerId, setCustomerId] = useState("");
   const [uploadedFile, setUploadedFile] = useState(null);
-  const [isDocumentUploaded, setIsDocumentUploaded] = useState(false);
-  const [forceReupload, setForceReupload] = useState(false);
+
+  // ✅ Per-stage maps instead of single booleans
+  const [isDocumentUploaded, setIsDocumentUploaded] = useState({});
+  const [forceReupload, setForceReupload] = useState({});
 
   const MySwal = withReactContent(Swal);
 
@@ -73,7 +74,6 @@ const SingleProjectLayer = () => {
       const paid = Number(stage?.paid) || 0;
       return acc + Math.max(0, goal - paid);
     }, 0);
-
     return { cost: projectBudget, paid: totalCollected, balance: totalPending };
   }, [stagesList, currentProject]);
 
@@ -98,49 +98,45 @@ const SingleProjectLayer = () => {
     }).format(date);
   };
 
-
   const fileUpload = async (stageId) => {
-  MySwal.fire({
-    title: '<span style="font-size: 25px">Upload Stage Documents</span>',
-    width: '500px',
-    showConfirmButton: false,
-    html: (
-      <DocumentUploadModal 
-        isUploading={false}
-        onClose={() => MySwal.close()}
-        onUpload={async (files) => {
-          MySwal.showLoading();
-          
-          const formData = new FormData();
-          // ✅ Append text fields FIRST before files
-          formData.append("projectId", id);
-          formData.append("stageId", stageId);
-          formData.append("customerId", customerId);
-          // ✅ Files come AFTER
-          files.forEach(file => formData.append("documents", file));
-
-          try {
-            const success = await recordDocumentFunction(dispatch, id, stageId, customerId, formData);
-            if (success) {
-              setIsDocumentUploaded(true);
-              setForceReupload(false);
-              await individualStages(dispatch, id);
-              MySwal.fire({ icon: 'success', title: 'Success', text: 'Documents uploaded!', timer: 1500 });
+    MySwal.fire({
+      title: '<span style="font-size: 25px">Upload Stage Documents</span>',
+      width: '500px',
+      showConfirmButton: false,
+      html: (
+        <DocumentUploadModal
+          isUploading={false}
+          onClose={() => MySwal.close()}
+          onUpload={async (files) => {
+            MySwal.showLoading();
+            const formData = new FormData();
+            formData.append("projectId", id);
+            formData.append("stageId", stageId);
+            formData.append("customerId", customerId);
+            files.forEach(file => formData.append("documents", file));
+            try {
+              const success = await recordDocumentFunction(dispatch, id, stageId, customerId, formData);
+              if (success) {
+                // ✅ Per-stage update
+                setIsDocumentUploaded(prev => ({ ...prev, [stageId]: true }));
+                setForceReupload(prev => ({ ...prev, [stageId]: false }));
+                await individualStages(dispatch, id);
+                MySwal.fire({ icon: 'success', title: 'Success', text: 'Documents uploaded!', timer: 1500 });
+              }
+            } catch (error) {
+              toast.error("Upload failed");
+              MySwal.close();
             }
-          } catch (error) {
-            toast.error("Upload failed");
-            MySwal.close();
-          }
-        }}
-      />
-    )
-  });
-};
+          }}
+        />
+      )
+    });
+  };
 
   const addNewStage = async () => {
     const totalAllocated = stagesList.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
     const remainingBudgetToAllocate = Number(totals.cost) - totalAllocated;
-    
+
     if (remainingBudgetToAllocate <= 0) {
       Swal.fire("Full", "Total budget has already been allocated to stages.", "info");
       return;
@@ -197,35 +193,36 @@ const SingleProjectLayer = () => {
     });
 
     if (formValues) {
-      const success = await addStageFunction(dispatch, { 
-        customer_id: customerId, 
+      const success = await addStageFunction(dispatch, {
+        customer_id: customerId,
         stage_Name: formValues[0],
         payment_status: "Pending",
-        description: formValues[1], 
+        description: formValues[1],
         amount: formValues[2],
         duration: formValues[3]
       }, id);
 
       if (success) {
-        setIsDocumentUploaded(false);
-        individualStages(dispatch, id); 
+        // ✅ Reset all stage upload states on new stage add
+        setIsDocumentUploaded({});
+        individualStages(dispatch, id);
       }
     }
   };
 
   const updateStatus = async (stageId, currentStatus, skipModal = false) => {
     let newStatus = "";
-    
+
     if (skipModal) {
-      newStatus = currentStatus; 
+      newStatus = currentStatus;
     } else {
       const { value: selectedStatus } = await Swal.fire({
         title: '<span style="font-size: 25px">Update Status</span>',
         input: 'select',
-        inputOptions: { 
-          'Initialized': 'Initialized', 
-          'In Progress': 'In Progress', 
-          'Completed': 'Completed' 
+        inputOptions: {
+          'Initialized': 'Initialized',
+          'In Progress': 'In Progress',
+          'Completed': 'Completed'
         },
         inputValue: currentStatus,
         inputAttributes: { style: "border: 1px solid #d1d5db; border-radius: 8px; padding: 8px;" },
@@ -250,230 +247,214 @@ const SingleProjectLayer = () => {
     return false;
   };
 
-    const recordPayment = async (stageId, stageAmount, stagePaid) => {
+  const recordPayment = async (stageId, stageAmount, stagePaid) => {
     const stageRemaining = Math.max(0, Number(stageAmount) - Number(stagePaid));
 
     const { value: formValues } = await Swal.fire({
-        title: '<span style="font-size: 25px">Record Payment</span>',
-        html: `
-            <div style="text-align: left;">
-                <p style="font-size: 12px;" class="fw-bold text-secondary-light">Balance: ${formatCurrency(stageRemaining)}</p>
-                <div class="mb-3">
-                    <label class="text-xs fw-bold mb-1">Amount to Pay</label>
-                    <input id="swal-payment" type="number" class="form-control" value="${stageRemaining}">
-                    <div id="error-payment" class="text-danger d-none" style="font-size: 11px; margin-top: 4px; font-weight: 500;">Please enter a valid amount within the balance.</div>
-                </div>
-                <label class="text-xs fw-bold mb-1">Payment Mode</label>
-                <select id="swal-mode" class="form-select">
-                    <option value="online">Online</option>
-                    <option value="offline">Offline</option>
-                </select>
-            </div>`,
-        showCancelButton: true,
-        focusConfirm: false,
-        preConfirm: () => {
-            const paymentAmount = Number(document.getElementById('swal-payment').value);
-            const paymentMode = document.getElementById('swal-mode').value;
-            document.getElementById('error-payment').classList.add('d-none');
-            if (!paymentAmount || paymentAmount <= 0 || paymentAmount > stageRemaining) {
-                document.getElementById('error-payment').classList.remove('d-none');
-                return false;
-            }
-            return { paymentAmount, paymentMode };
+      title: '<span style="font-size: 25px">Record Payment</span>',
+      html: `
+        <div style="text-align: left;">
+          <p style="font-size: 12px;" class="fw-bold text-secondary-light">Balance: ${formatCurrency(stageRemaining)}</p>
+          <div class="mb-3">
+            <label class="text-xs fw-bold mb-1">Amount to Pay</label>
+            <input id="swal-payment" type="number" class="form-control" value="${stageRemaining}">
+            <div id="error-payment" class="text-danger d-none" style="font-size: 11px; margin-top: 4px; font-weight: 500;">Please enter a valid amount within the balance.</div>
+          </div>
+          <label class="text-xs fw-bold mb-1">Payment Mode</label>
+          <select id="swal-mode" class="form-select">
+            <option value="online">Online</option>
+            <option value="offline">Offline</option>
+          </select>
+        </div>`,
+      showCancelButton: true,
+      focusConfirm: false,
+      preConfirm: () => {
+        const paymentAmount = Number(document.getElementById('swal-payment').value);
+        const paymentMode = document.getElementById('swal-mode').value;
+        document.getElementById('error-payment').classList.add('d-none');
+        if (!paymentAmount || paymentAmount <= 0 || paymentAmount > stageRemaining) {
+          document.getElementById('error-payment').classList.remove('d-none');
+          return false;
         }
+        return { paymentAmount, paymentMode };
+      }
     });
 
     if (formValues) {
-        Swal.showLoading();
+      Swal.showLoading();
 
-        // Check if this payment will fully settle the stage
-        const isFullPayment = formValues.paymentAmount >= stageRemaining;
+      const isFullPayment = formValues.paymentAmount >= stageRemaining;
 
-        const payload = {
-            amount: formValues.paymentAmount,
-            payment_mode: formValues.paymentMode,
-            payment_date: new Date().toISOString(),
-            customerId: customerId,
-            budget: totals.cost,
-            customerName: currentProject?.customerName || "N/A",
-            projectName: currentProject?.projectName || "N/A",
-            // ✅ Set payment_status based on whether fully paid
-            payment_status: isFullPayment ? "Paid" : "Partially Paid",
-            stage_amount: stageAmount
-        };
+      const payload = {
+        amount: formValues.paymentAmount,
+        payment_mode: formValues.paymentMode,
+        payment_date: new Date().toISOString(),
+        customerId: customerId,
+        budget: totals.cost,
+        customerName: currentProject?.customerName || "N/A",
+        projectName: currentProject?.projectName || "N/A",
+        payment_status: isFullPayment ? "Paid" : "Partially Paid",
+        stage_amount: stageAmount
+      };
 
-        const success = await stagePaymentCollection(dispatch, payload, stageId, id);
+      const success = await stagePaymentCollection(dispatch, payload, stageId, id);
 
-        if (success) {
-            // ✅ Auto-update stage status to Completed when fully paid
-            if (isFullPayment) {
-    // ✅ silent = true — no toast, payment Swal already handles the success message
-    await updateStageStatusFunction(dispatch, { status: "Completed" }, stageId, id, true);
-}
-
-            setIsDocumentUploaded(false);
-            setUploadedFile(null);
-            await individualStages(dispatch, id);
-            await fetchAllStagesForStats(dispatch);
-
-            Swal.fire({
-                icon: "success",
-                title: isFullPayment
-                    ? '<span style="font-size:20px">✅ Stage Completed!</span>'
-                    : '<span style="font-size:20px">Payment Recorded</span>',
-                text: isFullPayment
-                    ? "Payment complete. Stage has been marked as Completed."
-                    : "Partial payment recorded successfully.",
-                timer: 2000,
-                showConfirmButton: false,
-            });
+      if (success) {
+        if (isFullPayment) {
+          await updateStageStatusFunction(dispatch, { status: "Completed" }, stageId, id, true);
         }
-    }
-};
-  const clearFileSelection = async (stageId) => {
-    const result = await Swal.fire({ title: '<span style="font-size: 25px">Are You sure ?</span>' ,text: "This will delete files from the server.", icon: "warning", showCancelButton: true, confirmButtonColor: "#d33", confirmButtonText: "Yes, delete it!" });
-    if (result.isConfirmed) {
-      const success = await deleteStageDocumentFunction(dispatch, id, stageId);
-      if (success) { setUploadedFile(null); setIsDocumentUploaded(false); setForceReupload(true); }
+
+        // ✅ Per-stage reset on payment
+        setIsDocumentUploaded(prev => ({ ...prev, [stageId]: false }));
+        setUploadedFile(null);
+        await individualStages(dispatch, id);
+        await fetchAllStagesForStats(dispatch);
+
+        Swal.fire({
+          icon: "success",
+          title: isFullPayment
+            ? '<span style="font-size:20px">✅ Stage Completed!</span>'
+            : '<span style="font-size:20px">Payment Recorded</span>',
+          text: isFullPayment
+            ? "Payment complete. Stage has been marked as Completed."
+            : "Partial payment recorded successfully.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
     }
   };
 
-
-const openPreviewModal = (stage) => {
-  const dbPaths = stage?.documentPath 
-    ? stage.documentPath.split(',').filter(path => path.trim() !== '' && path.includes('.')) 
-    : [];
-
-  if (dbPaths.length === 0) return Swal.fire("No Files", "No documents uploaded.", "info");
-
-  const baseUrl = process.env.REACT_APP_IMG_URL;
-  const token = localStorage.getItem('token');
-
-const filesHtml = dbPaths.map((pathStr, index) => {
-    const cleanPath = pathStr.trim().replace(/\\/g, '/').replace(/^\//, '');
-    
-    // ✅ ADD THIS — prefix path if DB only stored the filename
-    const fullPath = cleanPath.includes('/') ? cleanPath : `uploads/stages/${cleanPath}`;
-    
-    const fileName = cleanPath.split('/').pop();
-    const fileExt = fileName.split('.').pop().toLowerCase();
-    return `
-      <div class="preview-item" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid #f0f0f0;gap:10px;">
-        <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
-          <span style="font-size:20px;">${['pdf'].includes(fileExt) ? '📄' : '🖼️'}</span>
-          <div style="min-width:0;">
-            <p style="margin:0;font-size:13px;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${fileName}</p>
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;">
-          <button class="btn-preview-trigger" data-path="${fullPath}" data-ext="${fileExt}"
-            style="background:#e8f4ff;color:#185FA5;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">
-            Preview
-          </button>
-          <button class="btn-download-trigger" data-path="${fullPath}" data-name="${fileName}"
-            style="background:#f0fdf4;color:#16a34a;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">
-            Download
-          </button>
-        </div>
-      </div>`;
-  }).join('');
-
-  MySwal.fire({
-    title:'<span style="font-size: 25px">Stage Documents</span>',
-    html: `<div id="swal-files-container">${filesHtml}</div>`,
-    showConfirmButton: false,
-    showCloseButton: true,
-    didRender: () => {
-      const content = MySwal.getHtmlContainer();
-      
-      content.querySelectorAll('.btn-preview-trigger').forEach(btn => {
-        btn.onclick = () => {
-          executePreview(btn.getAttribute('data-path'), btn.getAttribute('data-ext'), baseUrl, token);
-        };
-      });
-
-      content.querySelectorAll('.btn-download-trigger').forEach(btn => {
-        btn.onclick = () => {
-          handleFileDownload(btn.getAttribute('data-path'), btn.getAttribute('data-name'), baseUrl, token);
-        };
-      });
-    }
-  });
-};
-
-/**
- * 2. Preview Logic
- */
-const executePreview = async (cleanPath, ext, baseUrl, token) => {
-    const encodedPath = cleanPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-  const fullUrl = `${baseUrl}/${encodedPath}`;
-  const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
-  const isPdf = ext === 'pdf';
-
-  console.log("Attempting to fetch:", fullUrl); // Add this
-    console.log("Token:", token ? "exists" : "missing");
-
-  const tid = toast.loading("Loading...");
-
-  try {
-    const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    
-    const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    toast.dismiss(tid);
-
-// ✅ REPLACE WITH
-MySwal.fire({
-  html: isImage 
-    ? `<img src="${blobUrl}" style="max-width:100%; max-height:70vh; object-fit:contain; border-radius:8px; display:block; margin:auto;" />` 
-    : `<iframe src="${blobUrl}#toolbar=0" width="100%" height="500px" style="border:none; border-radius:8px;"></iframe>`,
-  width: isImage ? '600px' : '850px',
-  padding: '16px',
-  showConfirmButton: false,
-  showCloseButton: true,
-  customClass: {
-    popup: 'swal-preview-popup',
-    closeButton: 'swal-preview-close'
-  },
-  didClose: () => URL.revokeObjectURL(blobUrl)
-});
-  } catch (err) {
-    console.error("Preview Error:", err);
-    toast.dismiss(tid);
-    toast.error("Preview failed.");
-  }
-};
-
-/**
- * 3. Download Logic (Simplified to use fetch)
- */
-const handleFileDownload = async (cleanPath, fileName, baseUrl, token) => {
-  const encodedPath = cleanPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
-  
-  const tid = toast.loading("Downloading...");
-  try {
-    const res = await fetch(`${baseUrl}/${encodedPath}`, {
-      headers: { Authorization: `Bearer ${token}` }
+  const clearFileSelection = async (stageId) => {
+    const result = await Swal.fire({
+      title: '<span style="font-size: 25px">Are You sure ?</span>',
+      text: "This will delete files from the server.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
     });
-    if (!res.ok) throw new Error("Download failed");
+    if (result.isConfirmed) {
+      const success = await deleteStageDocumentFunction(dispatch, id, stageId);
+      if (success) {
+        setUploadedFile(null);
+        // ✅ Per-stage reset on delete
+        setIsDocumentUploaded(prev => ({ ...prev, [stageId]: false }));
+        setForceReupload(prev => ({ ...prev, [stageId]: true }));
+      }
+    }
+  };
 
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-    toast.dismiss(tid);
-  } catch (error) {
-    console.error("Download Error:", error);
-    toast.dismiss(tid);
-    toast.error("Download failed.");
-  }
-};
+  const openPreviewModal = (stage) => {
+    const dbPaths = stage?.documentPath
+      ? stage.documentPath.split(',').filter(path => path.trim() !== '' && path.includes('.'))
+      : [];
+
+    if (dbPaths.length === 0) return Swal.fire("No Files", "No documents uploaded.", "info");
+
+    const baseUrl = process.env.REACT_APP_IMG_URL;
+    const token = localStorage.getItem('token');
+
+    const filesHtml = dbPaths.map((pathStr, index) => {
+      const cleanPath = pathStr.trim().replace(/\\/g, '/').replace(/^\//, '');
+      const fullPath = cleanPath.includes('/') ? cleanPath : `uploads/stages/${cleanPath}`;
+      const fileName = cleanPath.split('/').pop();
+      const fileExt = fileName.split('.').pop().toLowerCase();
+      return `
+        <div class="preview-item" style="display:flex;align-items:center;justify-content:space-between;padding:12px;border-bottom:1px solid #f0f0f0;gap:10px;">
+          <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1;">
+            <span style="font-size:20px;">${['pdf'].includes(fileExt) ? '📄' : '🖼️'}</span>
+            <div style="min-width:0;">
+              <p style="margin:0;font-size:13px;font-weight:600;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${fileName}</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-preview-trigger" data-path="${fullPath}" data-ext="${fileExt}"
+              style="background:#e8f4ff;color:#185FA5;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">
+              Preview
+            </button>
+            <button class="btn-download-trigger" data-path="${fullPath}" data-name="${fileName}"
+              style="background:#f0fdf4;color:#16a34a;border:none;border-radius:6px;padding:6px 12px;font-size:11px;font-weight:600;cursor:pointer;">
+              Download
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+
+    MySwal.fire({
+      title: '<span style="font-size: 25px">Stage Documents</span>',
+      html: `<div id="swal-files-container">${filesHtml}</div>`,
+      showConfirmButton: false,
+      showCloseButton: true,
+      didRender: () => {
+        const content = MySwal.getHtmlContainer();
+        content.querySelectorAll('.btn-preview-trigger').forEach(btn => {
+          btn.onclick = () => {
+            executePreview(btn.getAttribute('data-path'), btn.getAttribute('data-ext'), baseUrl, token);
+          };
+        });
+        content.querySelectorAll('.btn-download-trigger').forEach(btn => {
+          btn.onclick = () => {
+            handleFileDownload(btn.getAttribute('data-path'), btn.getAttribute('data-name'), baseUrl, token);
+          };
+        });
+      }
+    });
+  };
+
+  const executePreview = async (cleanPath, ext, baseUrl, token) => {
+    const encodedPath = cleanPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+    const fullUrl = `${baseUrl}/${encodedPath}`;
+    const isImage = ['jpg', 'jpeg', 'png', 'webp'].includes(ext);
+
+    const tid = toast.loading("Loading...");
+    try {
+      const res = await fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } });
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      toast.dismiss(tid);
+      MySwal.fire({
+        html: isImage
+          ? `<img src="${blobUrl}" style="max-width:100%; max-height:70vh; object-fit:contain; border-radius:8px; display:block; margin:auto;" />`
+          : `<iframe src="${blobUrl}#toolbar=0" width="100%" height="500px" style="border:none; border-radius:8px;"></iframe>`,
+        width: isImage ? '600px' : '850px',
+        padding: '16px',
+        showConfirmButton: false,
+        showCloseButton: true,
+        customClass: { popup: 'swal-preview-popup', closeButton: 'swal-preview-close' },
+        didClose: () => URL.revokeObjectURL(blobUrl)
+      });
+    } catch (err) {
+      toast.dismiss(tid);
+      toast.error("Preview failed.");
+    }
+  };
+
+  const handleFileDownload = async (cleanPath, fileName, baseUrl, token) => {
+    const encodedPath = cleanPath.split('/').map(segment => encodeURIComponent(segment)).join('/');
+    const tid = toast.loading("Downloading...");
+    try {
+      const res = await fetch(`${baseUrl}/${encodedPath}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.dismiss(tid);
+    } catch (error) {
+      toast.dismiss(tid);
+      toast.error("Download failed.");
+    }
+  };
+
   if (!currentProject && projectList.length > 0) {
     return (
       <div className="d-flex align-items-center justify-content-center flex-grow-1 w-100" style={{ minHeight: '70vh' }}>
@@ -489,7 +470,7 @@ const handleFileDownload = async (cleanPath, fileName, baseUrl, token) => {
           </p>
           <div className="d-flex justify-content-center">
             <Link to="/projects-list" className="btn btn-primary-600 btn-lg d-flex align-items-center gap-3 px-32 radius-8">
-              <Icon icon="lucide:arrow-left" width="20" /> 
+              <Icon icon="lucide:arrow-left" width="20" />
               <span>Return to Project Dashboard</span>
             </Link>
           </div>
@@ -539,11 +520,18 @@ const handleFileDownload = async (cleanPath, fileName, baseUrl, token) => {
               const paid = Number(stage.paid) || 0;
               const pending = Math.max(0, goal - paid);
               const isCompleted = paid >= goal;
-              
+
+              // ✅ Per-stage doc/reupload state lookups
+              const stageDocUploaded = isDocumentUploaded[stage.id] || false;
+              const stageForceReupload = forceReupload[stage.id] || false;
+              const hasDocument = stageDocUploaded || (stage.documentPath && !stageForceReupload);
+
               return (
                 <div key={stage.id} className={`position-relative ps-24 ps-sm-32 ${index !== stagesList.length - 1 ? 'mb-32' : ''}`}>
-                  <div className={`position-absolute rounded-circle ${isCompleted ? 'bg-success-main shadow-lg' : 'bg-neutral-400'}`}
-                    style={{ left: "0", top: "6px", width: "14px", height: "14px", zIndex: 1, border: "3px solid white" }}></div>
+                  <div
+                    className={`position-absolute rounded-circle ${isCompleted ? 'bg-success-main shadow-lg' : 'bg-neutral-400'}`}
+                    style={{ left: "0", top: "6px", width: "14px", height: "14px", zIndex: 1, border: "3px solid white" }}
+                  ></div>
 
                   <div className="row align-items-start gy-3">
                     <div className="col-xl-6 col-lg-7">
@@ -552,7 +540,7 @@ const handleFileDownload = async (cleanPath, fileName, baseUrl, token) => {
                         <div className={`d-flex align-items-center gap-2 px-12 py-4 radius-4 border ${
                           stage.status === 'Completed' ? 'bg-success-50 text-success-600' :
                           stage.status === 'In Progress' ? 'bg-warning-50 text-warning-600' : 'bg-info-50 text-info-600'
-                        }`} style={{width: "max-content"}}>
+                        }`} style={{ width: "max-content" }}>
                           <span className="text-xxs fw-bold text-uppercase">{stage.status || 'Initialized'}</span>
                         </div>
                         <HasPermission permission={"change-status"}>
@@ -565,46 +553,77 @@ const handleFileDownload = async (cleanPath, fileName, baseUrl, token) => {
                       </div>
                       <p className="text-secondary-light text-sm mb-12">{stage.description}</p>
                       {stage.duration && <p className="text-secondary-light text-sm mb-12">Due : {formatDate(stage.duration)}</p>}
-                      
-                      <div className="d-flex flex-column flex-md-row gap-4">
-                        {index === activeStageIndex && (
-                          <div className="d-flex flex-wrap gap-2">
-                            {(isDocumentUploaded || (stage.documentPath && !forceReupload)) ? (
-                              <>
-                                <HasPermission permission={"upload-docs"}>
-                                  {!isReadOnly && (
-                                    <button onClick={() => openPreviewModal(stage)} className="btn btn-success-100 text-success-600 btn-sm text-xs px-12 py-4 d-flex align-items-center gap-2">
+
+                      {!isReadOnly && (
+                        <div className="d-flex flex-wrap gap-2">
+                          {isCompleted ? (
+                            // ✅ Stage fully paid — show only View Docs if document exists
+                            <>
+                                  {hasDocument ? (
+      <HasPermission permission={"upload-docs"}>
+        <button
+          onClick={() => openPreviewModal(stage)}
+          className="btn btn-success-100 text-success-600 btn-sm text-xs px-12 py-4 d-flex align-items-center gap-2"
+        >
+          <Icon icon="solar:documents-bold" /> View Docs
+        </button>
+      </HasPermission>
+    ) : (
+      <HasPermission permission={"upload-docs"}>
+        <button
+          onClick={() => fileUpload(stage.id)}
+          className="btn btn-primary-600 btn-md py-4 px-12 text-xs radius-4 d-flex align-items-center gap-2"
+        >
+          <Icon icon="solar:upload-bold" /> Upload
+        </button>
+      </HasPermission>
+    )}
+                            </>
+                          ) : (
+                            // ✅ Stage not yet fully paid — show upload + record payment
+                            <>
+                              {hasDocument ? (
+                                <>
+                                  <HasPermission permission={"upload-docs"}>
+                                    <button
+                                      onClick={() => openPreviewModal(stage)}
+                                      className="btn btn-success-100 text-success-600 btn-sm text-xs px-12 py-4 d-flex align-items-center gap-2"
+                                    >
                                       <Icon icon="solar:documents-bold" /> View Docs
                                     </button>
-                                  )}
-                                </HasPermission>
-                                <HasPermission permission={"upload-docs"}>
-                                  {!isReadOnly && (
-                                    <button onClick={() => clearFileSelection(stage.id)} className="d-flex align-items-center justify-content-center btn btn-danger-100 text-danger-600 btn-sm p-4">
+                                  </HasPermission>
+                                  <HasPermission permission={"upload-docs"}>
+                                    <button
+                                      onClick={() => clearFileSelection(stage.id)}
+                                      className="d-flex align-items-center justify-content-center btn btn-danger-100 text-danger-600 btn-sm p-4"
+                                    >
                                       <Icon icon="ic:round-close" />
                                     </button>
-                                  )}
-                                </HasPermission>
-                              </>
-                            ) : (
-                              <HasPermission permission={"upload-docs"}>
-                                {!isReadOnly && (
-                                  <button onClick={() => fileUpload(stage.id)} className="btn btn-primary-600 btn-md py-4 px-12 text-xs radius-4 d-flex align-items-center gap-2">
+                                  </HasPermission>
+                                </>
+                              ) : (
+                                <HasPermission permission={"upload-docs"}>
+                                  <button
+                                    onClick={() => fileUpload(stage.id)}
+                                    className="btn btn-primary-600 btn-md py-4 px-12 text-xs radius-4 d-flex align-items-center gap-2"
+                                  >
                                     <Icon icon="solar:upload-bold" /> Upload
                                   </button>
-                                )}
-                              </HasPermission>
-                            )}
-                            <HasPermission permission={"manage-payment"}>
-                              {!isReadOnly && (
-                                <button onClick={() => recordPayment(stage.id, goal, paid)} className="btn btn-success-600 btn-sm py-4 px-12 text-xs radius-4" disabled={!isDocumentUploaded && (!stage.documentPath || forceReupload)}>
+                                </HasPermission>
+                              )}
+                              <HasPermission permission={"manage-payment"}>
+                                <button
+                                  onClick={() => recordPayment(stage.id, goal, paid)}
+                                  className="btn btn-success-600 btn-sm py-4 px-12 text-xs radius-4"
+                            
+                                >
                                   Record Payment
                                 </button>
-                              )}
-                            </HasPermission>
-                          </div>
-                        )}
-                      </div>
+                              </HasPermission>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <HasPermission permission={"view-stages"}>
