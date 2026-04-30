@@ -187,8 +187,7 @@ const getProjectDetails = (projectData) => {
 
                   const userProjects = getProjectDetails(user.projects || user.projectId);
           
-                  console.log(userProjects);
-                  
+
                   return (
                     <tr key={user.id}>
                       <td className="text-capitalize">{String((currentPage - 1) * itemsPerPage + index + 1).padStart(2, "0")}</td>

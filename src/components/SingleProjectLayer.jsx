@@ -10,6 +10,7 @@ import {
   fetchAllStagesForStats, 
   individualStages, 
   recordDocumentFunction, 
+  recordStagePaymentFunction, 
   updateStageStatusFunction
 } from "../features/stages/stageService";
 import { stagePaymentCollection } from "../features/payment/paymentService";
@@ -298,6 +299,10 @@ useEffect(() => {
         payment_status: isFullPayment ? "Paid" : "Partially Paid",
         stage_amount: stageAmount
       };
+
+
+      recordStagePaymentFunction(dispatch, payload, stageId, id);
+      
 
       const success = await stagePaymentCollection(dispatch, payload, stageId, id);
 

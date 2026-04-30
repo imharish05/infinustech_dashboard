@@ -61,8 +61,9 @@ export const addStageFunction = async (dispatch, payload, projectId) => {
  * Record payment and update stage status in DB and Redux
  */
 export const recordStagePaymentFunction = async (dispatch, payload, stageId, projectId) => {
-    const loadingToast = toast.loading("Recording payment...");
+    
     try {
+        console.log(payload);
         const res = await api.put(`/stages/record-payment/${stageId}`, payload);
         const data = res.data.stage;
 
@@ -76,7 +77,7 @@ export const recordStagePaymentFunction = async (dispatch, payload, stageId, pro
             payment_status: data.payment_status
         }));
 
-        toast.success("Payment balance updated!", { id: loadingToast });
+        
 
         // 👇 ADD THIS BLOCK — fires notification if stage is completed but still unpaid
         if (res.data.reminder) {
@@ -93,7 +94,8 @@ export const recordStagePaymentFunction = async (dispatch, payload, stageId, pro
         return true;
     } catch (err) {
         const message = err.response?.data?.message || "Unable to record payment";
-        toast.error(message, { id: loadingToast });
+        console.log(message);
+        
         return false;
     }
 };

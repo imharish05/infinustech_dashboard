@@ -25,9 +25,7 @@ const filteredProjectOptions = useMemo(() => {
     // Collect all unique project IDs from payments
     const projectIdsWithPayments = new Set(payments.map(p => p.projectId));
 
-    console.log(projectIdsWithPayments,"Sample");
-    
-    
+
     return projects
         .filter(p => {
             const pId = p.id || p._id; // Normalize the ID
