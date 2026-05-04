@@ -41,7 +41,7 @@ const handlePhoneChange = (e) => {
     }
 };
 
-    const handleCancel = () => navigate(-1);
+const handleCancel = () => navigate(-1);
 
 
 

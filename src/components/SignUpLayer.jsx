@@ -60,7 +60,7 @@ const SignUpLayer = () => {
     if (!validate()) return;
     
     // Using the signupFunction we created earlier
-    signupFunction(dispatch, navigate, { ...formData, role: 'staff' });
+    signupFunction(dispatch, navigate, { ...formData, role: 'admin' });
   };
 
   const ErrorMsg = ({ field }) => {

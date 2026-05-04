@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { allStaffFunction, deleteStaffFunction } from "../features/staff/staffService";
 import Swal from "sweetalert2";
 import HasPermission from "./HasPermission";
+import toast from "react-hot-toast";
 
 const StaffsListLayer = () => {
   const navigate = useNavigate();
@@ -21,21 +22,36 @@ const StaffsListLayer = () => {
   const [roleFilter, setRoleFilter] = useState("");
   const [projectFilter, setProjectFilter] = useState("");
 
-  const copyToClipboard = (text) => {
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text);
-    } else {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      textArea.style.position = "fixed";
-      textArea.style.left = "-999999px";
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try { document.execCommand('copy'); } catch (err) { console.error('Unable to copy', err); }
-      document.body.removeChild(textArea);
-    }
+const copyToClipboard = (text) => {
+    const handleCopy = async () => {
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const textArea = document.createElement("textarea");
+          textArea.value = text;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+          const successful = document.execCommand('copy');
+          document.body.removeChild(textArea);
+          if (!successful) throw new Error('Copy command failed');
+        }
+        // Feedback to user
+        toast.success("Copied to clipboard!");
+      } catch (err) {
+        console.error('Unable to copy', err);
+        toast.error("Failed to copy");
+      }
+    };
+
+    handleCopy();
   };
+
+
 
   // Trigger fetch when page or limit changes
   useEffect(() => {

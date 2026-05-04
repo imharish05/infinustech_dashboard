@@ -7,7 +7,7 @@ const HomePageOne = () => {
     <>
 
     
-    <Breadcrumb title={"Dashboard"}/>
+    <Breadcrumb title={"Insights"}/>
 
     <DashBoardLayerOne/>
      

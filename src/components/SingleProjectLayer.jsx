@@ -301,7 +301,7 @@ useEffect(() => {
       };
 
 
-      recordStagePaymentFunction(dispatch, payload, stageId, id);
+      // recordStagePaymentFunction(dispatch, payload, stageId, id);
       
 
       const success = await stagePaymentCollection(dispatch, payload, stageId, id);
@@ -462,6 +462,8 @@ useEffect(() => {
     }
   };
 
+
+
   if (!currentProject && projectList.length > 0) {
     return (
       <div className="d-flex align-items-center justify-content-center flex-grow-1 w-100" style={{ minHeight: '70vh' }}>
@@ -486,6 +488,35 @@ useEffect(() => {
     );
   }
 
+const handleRefresh = (id) => {
+  // Clear local UI tracking states immediately
+  setIsDocumentUploaded({});
+  setForceReupload({});
+
+  // Wrap the API calls in a promise toast
+  toast.promise(
+    // We combine the dispatch calls into one promise chain
+    Promise.all([
+      individualStages(dispatch, id),
+      fetchAllStagesForStats(dispatch)
+    ]),
+    {
+      loading: 'Refreshing project data...',
+      success: <b>Data updated successfully!</b>,
+      error: <b>Could not refresh data.</b>,
+    },
+    {
+      style: {
+        minWidth: '250px',
+      },
+      success: {
+        duration: 3000,
+        icon: '🔄',
+      },
+    }
+  );
+};
+
   return (
     <div className="p-12 p-md-24 bg-base radius-12 shadow-sm border">
       <div className="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-24">
@@ -502,7 +533,7 @@ useEffect(() => {
     )}
   </HasPermission>
     <button
-    onClick={() => { individualStages(dispatch, id); fetchAllStagesForStats(dispatch); }}
+    onClick={() => {handleRefresh(id) }}
     className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-2 radius-8"
     title="Refresh"
   >

@@ -36,28 +36,35 @@ const filteredProjectOptions = useMemo(() => {
         );
 }, [projects, payments, projectSearchTerm]);
   // Main filter logic
-  const reportData = useMemo(() => {
-    return payments
-      .map((pay) => ({
-        ...pay,
-        formattedDate: pay.payment_date ? pay.payment_date.split("T")[0] : "",
-      }))
-      .filter((item) => {
-        const search = searchTerm.toLowerCase();
-        const matchesSearch =
-          !searchTerm ||
-          (item.customerName || "").toLowerCase().includes(search) ||
-          (item.projectName || "").toLowerCase().includes(search);
+// Main filter logic
+  const reportData = useMemo(() => {
+    return payments
+      .map((pay) => ({
+        ...pay,
+        formattedDate: pay.payment_date ? pay.payment_date.split("T")[0] : "",
+      }))
+      // --- ADD THIS SORT LOGIC ---
+      .sort((a, b) => {
+        const dateA = new Date(a.payment_date || 0);
+        const dateB = new Date(b.payment_date || 0);
+        return dateB - dateA; // Sorts descending (Newest first)
+      })
+      // ---------------------------
+      .filter((item) => {
+        const search = searchTerm.toLowerCase();
+        const matchesSearch =
+          !searchTerm ||
+          (item.customerName || "").toLowerCase().includes(search) ||
+          (item.projectName || "").toLowerCase().includes(search);
 
-        const matchesProject = !selectedProjectId || String(item.projectId) === String(selectedProjectId);
+        const matchesProject = !selectedProjectId || String(item.projectId) === String(selectedProjectId);
 
-        const matchesStartDate = !startDate || item.formattedDate >= startDate;
-        const matchesEndDate = !endDate || item.formattedDate <= endDate;
+        const matchesStartDate = !startDate || item.formattedDate >= startDate;
+        const matchesEndDate = !endDate || item.formattedDate <= endDate;
 
-        return matchesSearch && matchesProject && matchesStartDate && matchesEndDate;
-      });
-  }, [payments, searchTerm, selectedProjectId, startDate, endDate]);
-
+        return matchesSearch && matchesProject && matchesStartDate && matchesEndDate;
+      });
+  }, [payments, searchTerm, selectedProjectId, startDate, endDate]);
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);

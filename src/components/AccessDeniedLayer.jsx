@@ -8,7 +8,7 @@ const AccessDeniedLayer = () => {
       <div className='container container--xl'>
         <div className='d-flex align-items-center justify-content-between py-24'>
           <Link to='/' className=''>
-            <img src='assets/images/logo.png' alt='' />
+            <img src='/assets/images/logo.png' className='img-fluid w-50' alt='' />
           </Link>
           <Link to='/' className='btn btn-outline-primary-600 text-sm'>
             {" "}
