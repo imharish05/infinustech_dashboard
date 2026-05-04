@@ -101,12 +101,16 @@ useEffect(() => {
   };
 
   const fileUpload = async (stageId) => {
+
+    const stageForceReupload = forceReupload[stageId];
+
     MySwal.fire({
       title: '<span style="font-size: 25px">Upload Stage Documents</span>',
       width: '500px',
       showConfirmButton: false,
       html: (
         <DocumentUploadModal
+        key={stageForceReupload ? "reupload" : "normal"}
           isUploading={false}
           onClose={() => MySwal.close()}
           onUpload={async (files) => {
