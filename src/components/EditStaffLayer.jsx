@@ -202,8 +202,8 @@ const EditStaffLayer = () => {
                                                 }}
                                             >
                                                 <option value="" disabled>Select a role</option> 
-                                                <option value="Staff">Staff</option>
-                                                <option value="Designer">Designer</option>
+                                                <option value="staff">Staff</option>
+                                                <option value="designer">Designer</option>
                                             </select>
                                             <div className="position-absolute end-0 top-50 translate-middle-y me-12 pt-8 pointer-events-none">
                                                 <Icon 

@@ -36,9 +36,9 @@ const availablePermissions = [
     { id: 'edit-projects', label: 'Edit Projects' },
     { id: 'delete-projects', label: 'Delete Projects' },
     { id: 'view-stages', label: 'View Stages Detail ' },
-    { id: 'change-status', label: 'Modify stage Status' },
+    { id: 'change-status', label: 'Modify Stage Status' },
     { id: 'upload-docs', label: 'Upload Documents' },
-    { id: 'manage-permissions', label: 'Manage permissions' }, // Changed label from 'Manage Roles'
+    { id: 'manage-permissions', label: 'Manage Permissions' }, // Changed label from 'Manage Roles'
     { id: 'manage-remainders', label: 'Manage Reminders' }, // Changed label from 'Manage Roles'
     { id: 'view-reports', label: 'View Reports' },
     { id: 'manage-payment', label: 'Manage Payment' },

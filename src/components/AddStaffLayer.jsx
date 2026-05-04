@@ -86,7 +86,6 @@ if (!phone.trim()) {
                 location,
                 status,
             };
-
             addStaffFunction(dispatch, payload);
             navigate("/staff-list");
         } catch (err) {
