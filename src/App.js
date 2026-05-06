@@ -14,7 +14,6 @@ import AddUserPage from "./pages/AddUserPage";
 import ErrorPage from "./pages/ErrorPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import SignInPage from "./pages/SignInPage";
-import SignUpPage from "./pages/SignUpPage";
 import UsersListPage from "./pages/UsersListPage";
 import ReportPage from "./pages/ReportPage";
 import ProjectListPage from "./pages/ProjectListPage";
@@ -52,7 +51,6 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path='/sign-in' element={<SignInPage />} />
-        <Route path='/sign-up' element={<SignUpPage />} />
         <Route path='/forgot-password' element={<ForgotPasswordPage />} />
         <Route path = "/access-denied" element = {<AccessDeniedLayer/>}/>
         {/* Protected Routes */}

@@ -40,7 +40,7 @@ const availablePermissions = [
     { id: 'manage-permissions', label: 'Manage Permissions' }, // Changed label from 'Manage Roles'
     { id: 'manage-remainders', label: 'Manage Reminders' }, // Changed label from 'Manage Roles'
     { id: 'view-reports', label: 'View Reports' },
-    { id: 'manage-payment', label: 'Manage Payment' },
+    { id: 'manage-payment', label: 'Manage Payments & Stages' },
 ];
     // 3. Load initial data on mount
     useEffect(() => {

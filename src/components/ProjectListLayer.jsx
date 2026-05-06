@@ -120,6 +120,9 @@ const ProjectListLayer = () => {
     });
   };
 
+  console.log(!hasPermission.includes("view-stages"));
+  
+
   return (
     <div className="card h-100 p-0 radius-12">
       <div className="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
@@ -183,7 +186,7 @@ const ProjectListLayer = () => {
                 <th>Project Type</th>
                 <th>Total Fees</th>
                 <th>Status</th>
-                <HasPermission permission={["edit-projects", "delete-projects","view-stages"]} mode="any">
+                <HasPermission permission={["edit-projects", "delete-projects","view-stages","upload-docs"]} mode="any">
                   <th className="text-center">Action</th>
                 </HasPermission>
               </tr>
@@ -193,14 +196,19 @@ const ProjectListLayer = () => {
                 filteredProjects.map((project, index) => (
                   <tr key={project.id}>
                     <td>{String((currentPage - 1) * itemsPerPage + index + 1).padStart(2, "0")}</td>
-                    <td>
-                      <HasPermission permission={["view-stages"]}>
-                        <Link to={`/projects/${project.id}`} className="text-primary-600 text-hover-underline text-capitalize">
-                          {project.projectName}
-                        </Link>
-                      </HasPermission>
-                      
-                    </td>
+<td>
+  {/* Option A: Link (Only if they have permission) */}
+  <HasPermission permission={["view-stages"]}>
+    <Link to={`/projects/${project.id}`} className="text-primary-600 text-hover-underline text-capitalize">
+      {project.projectName}
+    </Link>
+  </HasPermission>
+
+  {/* Option B: Plain Text (Only if they DON'T have permission) */}
+  {!hasPermission.includes("view-stages") && (
+    <span className="text-capitalize">{project.projectName}</span>
+  )}
+</td>
                     <td className="text-capitalize">{getStaffName(project.assignedStaffId)}</td>
                     <td className="text-capitalize">{getCustomerName(project.customerId)}</td>
                     <td className="text-capitalize ">{project.location}</td>
@@ -211,14 +219,14 @@ const ProjectListLayer = () => {
                         {project.status}
                       </span>
                     </td>
-                    <HasPermission permission={["edit-projects", "delete-projects", "upload-docs"]} mode="any">
-                      <td className="text-center">
-                        <div className="d-flex align-items-center gap-10 justify-content-center">
-                          <HasPermission permission={"upload-docs"}>
-                            <button onClick={() => handleView(project.id)} className="bg-info-focus text-info-600 w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle border-0">
-                              <Icon icon="majesticons:eye-line" className="text-xl" />
-                            </button>
-                          </HasPermission>
+                 <HasPermission permission={["edit-projects", "delete-projects", "upload-docs","view-stages"]} mode="any">
+  <td className="text-center">
+    <div className="d-flex align-items-center gap-10 justify-content-center">
+                          <HasPermission permission={["view-stages","upload-docs"]} mode="any">
+         <button onClick={() => handleView(project.id)} className="bg-info-focus text-info-600 w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle border-0">
+          <Icon icon="majesticons:eye-line" />
+        </button>
+      </HasPermission>
                           <HasPermission permission={"edit-projects"}>
                             <button onClick={() => handleEdit(project.id)} className="bg-success-focus text-success-600 w-40-px h-40-px d-flex justify-content-center align-items-center rounded-circle border-0">
                               <Icon icon="lucide:edit" />

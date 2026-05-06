@@ -6,6 +6,7 @@ import { allStaffFunction, deleteStaffFunction } from "../features/staff/staffSe
 import Swal from "sweetalert2";
 import HasPermission from "./HasPermission";
 import toast from "react-hot-toast";
+import { fetchAllPayments } from "../features/payment/paymentService";
 
 const StaffsListLayer = () => {
   const navigate = useNavigate();
@@ -132,9 +133,11 @@ const getProjectDetails = (projectData) => {
       confirmButtonColor: "#ea8b0c",
       reverseButtons: true,
     }).then((result) => {
+      fetchAllPayments(dispatch)
       if (result.isConfirmed) deleteStaffFunction(dispatch, id);
     });
   };
+  
 
   return (
     <div className="card h-100 p-0 radius-12">
@@ -235,7 +238,7 @@ const getProjectDetails = (projectData) => {
         style={{ 
           textDecoration: 'none',
           backgroundColor: '#FFFFFF', // Clean Base
-          border: '1px solid rgba(0,0,0,0.05)',
+          border: '2px solid rgba(0,0,0,0.05)',
           borderLeftColor: '#EA8B0C' // Your Orange Accent (Static)
         }}
         // Add pseudo-classes in your CSS or a Tailwind utility: 

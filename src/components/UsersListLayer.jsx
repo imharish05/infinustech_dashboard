@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { allCustomerFunction, deleteCustomerFunction } from "../features/customers/customerService";
 import Swal from "sweetalert2";
 import HasPermission from "./HasPermission";
+import { fetchAllPayments } from "../features/payment/paymentService";
 
 const UsersListLayer = () => {
   const navigate = useNavigate();
@@ -96,6 +97,8 @@ const UsersListLayer = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         deleteCustomerFunction(dispatch, id);
+        fetchAllPayments(dispatch)
+  
       }
     });
   };
