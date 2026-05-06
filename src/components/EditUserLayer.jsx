@@ -165,7 +165,7 @@ const EditUserLayer = () => {
                                         >
                                             <option value="active">Active</option>
                                             <option value="inactive">Inactive</option>
-                                            <option value="completed">Completed</option>
+                                            
                                         </select>
                                     </div>
 

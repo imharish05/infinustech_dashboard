@@ -53,8 +53,7 @@ const handleAddNewType = async () => {
             navigate(-1)
         }
 
-        
-
+    
         const customersList = useSelector((state) => state.customers.customers)
 
         const staffList = useSelector((state) => state.staffs.staffs)
@@ -72,6 +71,11 @@ const [selectedStaffRole, setSelectedStaffRole] = useState("");
 
 // Filter list based on search term for dropdown
 const filteredCustomers = customersList.filter(customer => {
+    const isActive = customer?.status === "active" || customer?.status === "Active"
+    
+    if (!isActive) return false;
+
+    // 2. Proceed with search filtering
     const name = customer?.name || ""; 
     const location = customer?.location || "";
 

@@ -38,7 +38,7 @@ const { socketNotifications, paymentReminders } = useSelector((state) => state.n
             </div>
             <div className="card-body p-20">
               {overdue && overdue.length > 0 ? (
-                overdue.map((item, i) => (
+                [...overdue].reverse().map((item, i) => (
                   <div key={i} className="d-flex align-items-center justify-content-between p-12 mb-12 radius-8 border border-danger-main bg-neutral-50">
                     <div>
                       <p className="text-xs text-primary-600 fw-bold mb-1 text-capitalize">{item.Project?.projectName}</p>
@@ -71,7 +71,7 @@ const { socketNotifications, paymentReminders } = useSelector((state) => state.n
             </div>
             <div className="card-body p-20">
               {unpaidCompleted && unpaidCompleted.length > 0 ? (
-                unpaidCompleted.map((item, i) => (
+                [...unpaidCompleted].reverse().map((item, i) => (
                   <div key={i} className="d-flex align-items-center justify-content-between p-12 mb-12 radius-8 border-start border-1 border-warning-main bg-neutral-50">
                     <div>
                       <p className="text-xs text-primary-600 fw-bold mb-1 text-capitalize">{item.Project?.projectName}</p>

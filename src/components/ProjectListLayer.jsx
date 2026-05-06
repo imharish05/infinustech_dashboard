@@ -183,7 +183,7 @@ const ProjectListLayer = () => {
                 <th>Project Type</th>
                 <th>Total Fees</th>
                 <th>Status</th>
-                <HasPermission permission={["edit-projects", "delete-projects","view-projects"]} mode="any">
+                <HasPermission permission={["edit-projects", "delete-projects","view-stages"]} mode="any">
                   <th className="text-center">Action</th>
                 </HasPermission>
               </tr>
@@ -194,12 +194,12 @@ const ProjectListLayer = () => {
                   <tr key={project.id}>
                     <td>{String((currentPage - 1) * itemsPerPage + index + 1).padStart(2, "0")}</td>
                     <td>
-                      <HasPermission permission={"upload-docs"}>
+                      <HasPermission permission={["view-stages"]}>
                         <Link to={`/projects/${project.id}`} className="text-primary-600 text-hover-underline text-capitalize">
                           {project.projectName}
                         </Link>
                       </HasPermission>
-                      {!hasPermission.includes("upload-docs") && project.projectName}
+                      
                     </td>
                     <td className="text-capitalize">{getStaffName(project.assignedStaffId)}</td>
                     <td className="text-capitalize">{getCustomerName(project.customerId)}</td>

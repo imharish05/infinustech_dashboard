@@ -337,7 +337,7 @@ const MasterLayout = () => {
               </li>
             </HasPermission>
 
-            <HasPermission permission={["view-projects", "create-projects"]} mode="any">
+            <HasPermission permission={["view-projects", "create-projects","edit-projects"]} mode="any">
               <li className={`dropdown ${isProjectRoute ? "open" : ""}`}>
                 <NavLink
                   to="/projects-list"
@@ -378,7 +378,7 @@ const MasterLayout = () => {
               </li>
             </HasPermission>
 
-            <HasPermission permission={"manage-access"}>
+            <HasPermission permission={"manage-permissions"}>
               <li>
                 <NavLink
                   to="/role-access"
@@ -471,7 +471,7 @@ const MasterLayout = () => {
                       <div className="max-h-400-px overflow-y-auto scroll-sm pe-4">
 
                         {/* ── OVERDUE REMINDERS ── */}
-                        {overdue.map((item, index) => {
+                        {[...overdue].reverse().map((item, index) => {
                           // ✅ Resolve project name from the Redux projectMap
                           const projectName = resolveProjectName(item);
                           const balance =
@@ -503,7 +503,7 @@ const MasterLayout = () => {
                         })}
 
                         {/* ── UNPAID COMPLETED REMINDERS ── */}
-                        {unpaidCompleted.map((item, index) => {
+                        {[...unpaidCompleted].reverse().map((item, index) => {
                           // ✅ Resolve project name from the Redux projectMap
                           const projectName = resolveProjectName(item);
                           const balance =

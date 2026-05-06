@@ -16,7 +16,6 @@ const PermissionManagement = () => {
     const roles = [
         { id: 'admin', name: 'Administrator', icon: 'lucide:shield-check', color: 'bg-danger-focus text-danger-main' },
         { id: 'designer', name: 'Designer', icon: 'lucide:pen-tool', color: 'bg-info-focus text-info-main' },
-        { id: 'customer', name: 'Customer', icon: 'lucide:user', color: 'bg-success-focus text-success-main' },
         { id: 'staff', name: 'Operations Staff', icon: 'lucide:settings', color: 'bg-warning-focus text-warning-main' }
     ];
 
@@ -83,7 +82,7 @@ const handleSave = async () => {
 
             <div className="row g-4">
                 {roles.map((role) => (
-                    <div className="col-xxl-3 col-lg-4 col-sm-6" key={role.id}>
+                    <div className="col-xxl-4 col-lg-4 col-sm-6" key={role.id}>
                         <div className="card h-100 radius-12 border">
                             <div className="card-header border-bottom bg-base py-16 px-20 d-flex align-items-center gap-3">
                                 <div className={`p-10 radius-8 ${role.color}`}>

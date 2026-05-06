@@ -15,10 +15,6 @@ export const getAllProjects = async (dispatch, page = 1, limit = 5) => {
 };
 export const addNewProject = async (dispatch, payload) => {
     const loadingToast = toast.loading("Saving new project...");
-
-    console.log(payload);
-    
-    
     try {
         const res = await api.post("/projects/add-project", payload);
         dispatch(addProjects(res.data.project));
