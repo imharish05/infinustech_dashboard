@@ -29,6 +29,7 @@ import NotificationAlertPage from "./pages/NotificationAlertPage";
 // Services
 import { loadUserFunction } from "./features/auth/authService";
 import AccessDeniedLayer from "./components/AccessDeniedLayer";
+import SignUpPage from "./pages/SignUpPage";
 
 function App() {
   const dispatch = useDispatch();
@@ -51,6 +52,7 @@ function App() {
       <Routes>
         {/* Public Routes */}
         <Route path='/sign-in' element={<SignInPage />} />
+        <Route path='/sign-up' element={<SignUpPage />} />
         <Route path='/forgot-password' element={<ForgotPasswordPage />} />
         <Route path = "/access-denied" element = {<AccessDeniedLayer/>}/>
         {/* Protected Routes */}
